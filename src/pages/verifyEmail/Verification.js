@@ -19,7 +19,7 @@ const Verification = () => {
             setMessage("Email verified successfully!");
             // Delay before redirecting to login page or dashboard
             setTimeout(() => {
-                navigate('/login');
+                navigate('/dashboard');
             }, 3000); // 3 seconds delay
         } catch (error) {
             console.error("There was an error verifying the email!", error);
