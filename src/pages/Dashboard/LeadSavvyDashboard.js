@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import Sidebar from "../../components/Sidebar";
 import "./LeadSavvyDashboard.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faTimes, faSearch, faPhone, faBell, faBolt, faBrain, faTachometerAlt, faAddressBook, faComments, faCalendarAlt, faCreditCard, faEnvelope, faFileAlt, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faSearch, faPhone, faBell } from '@fortawesome/free-solid-svg-icons';
+
 
 function LeadSavvyDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,73 +13,9 @@ function LeadSavvyDashboard() {
   };
 
   return (
+    
     <div className={`container ${isSidebarOpen ? "sidebar-open" : ""}`}>
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h1>Lead Savvy</h1>
-          <button className="close-button" onClick={toggleSidebar}>
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-        </div>
-        <div>
-          <div className="profile-container">
-            <div className="profile">
-              <img
-                src="https://storage.googleapis.com/a1aa/image/Hb1tJHs4tyLnI55EPhkGijS5yEknl2xf1asTFIDj3oSjfZDUA.jpg"
-                alt="Profile of Kaneer Kerla"
-                width="50"
-                height="50"
-              />
-              <div>
-                <span>Kaneer Kerla</span>
-                <span>Austin, Texas</span>
-              </div>
-            </div>
-          </div>
-          <div className="search-container">
-            <div className="search">
-              <input type="text" placeholder="Search" />
-            </div>
-            <div className="flash-icon">
-              <FontAwesomeIcon icon={faBolt} />
-            </div>
-          </div>
-          <div className="menu">
-            <a href="#">
-              <FontAwesomeIcon icon={faBrain} /> AI Help
-            </a>
-            <a href="#" className="active">
-              <FontAwesomeIcon icon={faTachometerAlt} /> Dashboard
-            </a>
-            <a href="#">
-              <FontAwesomeIcon icon={faAddressBook} /> Contact
-            </a>
-            <a href="#">
-              <FontAwesomeIcon icon={faComments} /> Conversation
-            </a>
-            <a href="#">
-              <FontAwesomeIcon icon={faCalendarAlt} /> Calendar
-            </a>
-            <a href="#">
-              <FontAwesomeIcon icon={faCreditCard} /> Payment
-            </a>
-            <a href="#">
-              <FontAwesomeIcon icon={faEnvelope} /> Email Marketing
-            </a>
-            <a href="http://127.0.0.1:5500/gramateria-master/build/">
-              <FontAwesomeIcon icon={faFileAlt} /> Landing Page Builder
-            </a>
-          </div>
-        </div>
-        <div className="bottom-menu">
-          <a href="#">
-            <FontAwesomeIcon icon={faCog} /> Settings
-          </a>
-          <a href="#">
-            <FontAwesomeIcon icon={faSignOutAlt} /> Logout
-          </a>
-        </div>
-      </div>
+      <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="main-content">
         <div className="header">
           <button className="toggle-button" onClick={toggleSidebar}>

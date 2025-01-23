@@ -26,6 +26,9 @@ body, html {
     margin-bottom: 20px;
     text-align: center;
 }
+.left{
+    color: black;
+}
 .left .input-group {
     margin-bottom: 20px;
 }
@@ -77,6 +80,7 @@ body, html {
     font-size: 14px;
     color: #888;
     margin-top: 20px;
+    color: #000;
 }
 .right {
     width: 70%;

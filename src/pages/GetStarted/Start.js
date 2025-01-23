@@ -10,7 +10,7 @@ const RightSection = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container w-full">
       {/* Right Section */}
       <div className="rights">
         <div className="red-side"></div>
