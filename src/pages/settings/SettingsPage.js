@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Settings, Users, CreditCard, Briefcase, Menu, ArrowLeft, Bell, Globe, Shield, Mail, Palette } from 'lucide-react';
-import Sidebar2 from '../../components/Sidebar2';
+import Sidebar from '../../components/Sidebar2';
 import BusinessProfile from '../../components/BusinessProfile';
 import MyProfile from '../../components/MyProfile';
 import Billing from '../../components/Billing';
 import Staff from '../../components/Staff';
-import Opportunities from '../../components/Opportunities';
+import Opportunities from './Opportunities';
 import Notifications from '../../components/Notifications';
 import Localization from '../../components/Localization';
 import Security from '../../components/Security';
@@ -17,6 +18,7 @@ function SettingsPage() {
   const [activeMenu, setActiveMenu] = useState('business');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
+  const navigate = useNavigate();
 
   const menuItems = [
     { id: 'business', label: 'Business Profile', icon: Settings },
@@ -32,8 +34,7 @@ function SettingsPage() {
   ];
 
   const handleBack = () => {
-    setShowSettings(false);
-    console.log('Navigating back to dashboard');
+    navigate('/dashboard');
   };
 
   const renderContent = () => {
@@ -78,7 +79,7 @@ function SettingsPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="settings-page">
       <button
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -94,18 +95,17 @@ function SettingsPage() {
         Back to Dashboard
       </button>
 
-
-      <div className="flex-1 lg:ml-64 p-8 pt-20">
-        {renderContent()}
-      </div>
-
-      <div className="sidebar2-container">
-        <Sidebar2 
+      <div className={`sidebar-container ${isMobileMenuOpen ? 'sidebar-open' : ''}`}>
+        <Sidebar
           menuItems={menuItems} 
           activeMenu={activeMenu} 
           setActiveMenu={setActiveMenu}
           setMobileMenuOpen={setIsMobileMenuOpen}
         />
+      </div>
+
+      <div className="main-content">
+        {renderContent()}
       </div>
 
       {isMobileMenuOpen && (

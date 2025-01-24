@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Sidebar2({ menuItems, activeMenu, setActiveMenu, setMobileMenuOpen }) {
+function Sidebar({ menuItems, activeMenu, setActiveMenu, setMobileMenuOpen }) {
   const handleMenuClick = (menuId) => {
     setActiveMenu(menuId);
     setMobileMenuOpen(false);
@@ -34,4 +34,4 @@ function Sidebar2({ menuItems, activeMenu, setActiveMenu, setMobileMenuOpen }) {
   );
 }
 
-export default Sidebar2;
+export default Sidebar;
