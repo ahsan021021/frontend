@@ -13,6 +13,8 @@ import './Contact.css';
 function Contact() {
   const [currentPage, setCurrentPage] = useState('contacts');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupContent, setPopupContent] = useState(null);
 
   const menuItems = [
     { id: 'contacts', label: 'Contacts' },
@@ -27,7 +29,7 @@ function Contact() {
   const renderPage = () => {
     switch(currentPage) {
       case 'contacts':
-        return <Contacts />;
+        return <Contacts onButtonClick={handleButtonClick} />;
       case 'smartLists':
         return <SmartLists />;
       case 'bulkActions':
@@ -43,6 +45,16 @@ function Contact() {
       default:
         return <Contacts />;
     }
+  };
+
+  const handleButtonClick = (content) => {
+    setPopupContent(content);
+    setIsPopupOpen(true);
+  };
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setPopupContent(null);
   };
 
   return (
@@ -70,6 +82,14 @@ function Contact() {
           {renderPage()}
         </main>
       </div>
+      {isPopupOpen && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-popup" onClick={closePopup}>✖</button>
+            {popupContent}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -759,7 +759,6 @@ body {
 
 .main-content {
   flex: 1; /* Adjust this value to match the sidebar width */
-  padding: 1rem;
   background-color: var(--bg-color);
   color: var(--text-color);
   overflow-y: auto; /* Make the main content scrollable */
@@ -1567,7 +1566,6 @@ body {
 
 .main-content {
   flex: 1; /* Adjust this value to match the sidebar width */
-  padding: 1rem;
   background-color: var(--bg-color);
   color: var(--text-color);
   overflow-y: auto; /* Make the main content scrollable */
@@ -1694,7 +1692,7 @@ body {
 
 .main-content {
   flex: 1; /* Adjust this value to match the sidebar width */
-  padding: 1rem;
+
   background-color: var(--bg-color);
   color: var(--text-color);
   overflow-y: auto; /* Make the main content scrollable */

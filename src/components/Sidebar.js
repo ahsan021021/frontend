@@ -46,7 +46,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           <NavLink to="/contact" activeClassName="active">
             <FontAwesomeIcon icon={faAddressBook} className="menu-icon" /> Contact
           </NavLink>
-          <NavLink to="/" activeClassName="active">
+          <NavLink to="/conversation" activeClassName="active">
             <FontAwesomeIcon icon={faComments} className="menu-icon" /> Conversation
           </NavLink>
           <NavLink to="/calendar" activeClassName="active">

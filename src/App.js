@@ -9,6 +9,7 @@ import Contact from './pages/Contact/Contact';
 import Calendar from './pages/Calendar/Calendar';
 import OpportunitiesPage from './pages/Opportunities/OpportunitiesPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import Conversation from './pages/Conversation/Conversation';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/settings" element={<SettingsPage/>}/>
+        <Route path='/conversation' element={<Conversation/>}/>
         
         
         <Route path='/opportunities/*' element={<OpportunitiesPage/>}/>
