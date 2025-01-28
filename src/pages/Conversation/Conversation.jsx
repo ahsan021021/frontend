@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FiSearch, FiFilter, FiPlus, FiUser, FiMessageSquare, FiStar, FiClock, FiX, FiSmile, FiPaperclip, FiZap, FiFolder, FiEdit2, FiTrash2, FiMoreVertical } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiPlus, FiUser, FiMessageSquare, FiStar, FiClock, FiX, FiSmile, FiPaperclip, FiZap, FiFolder, FiEdit2, FiTrash2, FiMoreVertical, FiPhone, FiMail } from 'react-icons/fi';
 import Sidebar from '../../components/Sidebar'; // Import Sidebar component
 import './Conversation.css';
 
-function Conversation() {
+const Conversation = () => {
   const [activeTab, setActiveTab] = useState('conversations');
   const [activeSubTab, setActiveSubTab] = useState('unread');
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -14,22 +14,16 @@ function Conversation() {
   const [activeTriggerTab, setActiveTriggerTab] = useState('links');
   const [activeFolder, setActiveFolder] = useState('all');
   const [showFolderModal, setShowFolderModal] = useState(false);
-
-  const tabs = [
-    { id: 'conversations', label: 'Conversations' },
-    { id: 'manualActions', label: 'Manual Actions' },
-    { id: 'snippets', label: 'Snippets' },
-    { id: 'triggerLinks', label: 'Trigger Links' }
-  ];
-
-  const subTabs = [
-    { id: 'unread', label: 'Unread', icon: <FiMessageSquare /> },
-    { id: 'recents', label: 'Recents', icon: <FiClock /> },
-    { id: 'starred', label: 'Starred', icon: <FiStar /> },
-    { id: 'all', label: 'All', icon: null }
-  ];
-
-  const mockConversations = [
+  const [showAddConversationModal, setShowAddConversationModal] = useState(false);
+  const [newConversation, setNewConversation] = useState({
+    name: '',
+    email: '',
+    contact: '',
+    timestamp: new Date().toLocaleTimeString(),
+    unread: true,
+    avatar: '👤'
+  });
+  const [conversations, setConversations] = useState([
     {
       id: 1,
       name: 'John Doe',
@@ -54,32 +48,54 @@ function Conversation() {
       unread: false,
       avatar: '👨'
     }
-  ];
-
-  const mockMessages = {
+  ]);
+  const [messages, setMessages] = useState({
     1: [
       { id: 1, sender: 'John Doe', content: 'Hey, I need help with my recent order', time: '10:30 AM', type: 'received' },
       { id: 2, sender: 'Agent', content: 'Hello John! I\'d be happy to help. Could you please provide your order number?', time: '10:31 AM', type: 'sent' },
-      { id: 3, sender: 'John Doe', content: 'Sure, it\'s #ORD123456', time: '10:32 AM', type: 'received' }
+      { id: 3, sender: 'John Doe', content: 'Sure, it\'s #ORD123456', time: '10:32 AM', type: 'received' },
     ],
     2: [
       { id: 1, sender: 'Sarah Smith', content: 'Thank you for your assistance!', time: '9:45 AM', type: 'received' },
-      { id: 2, sender: 'Agent', content: 'You\'re welcome! Let me know if you need anything else.', time: '9:46 AM', type: 'sent' }
+      { id: 2, sender: 'Agent', content: 'You\'re welcome! Let me know if you need anything else.', time: '9:46 AM', type: 'sent' },
     ],
     3: [
       { id: 1, sender: 'Mike Johnson', content: 'When will my order be shipped?', time: 'Yesterday', type: 'received' },
       { id: 2, sender: 'Agent', content: 'Let me check that for you right away.', time: 'Yesterday', type: 'sent' },
-      { id: 3, sender: 'Agent', content: 'Your order will be shipped within the next 24 hours.', time: 'Yesterday', type: 'sent' }
-    ]
-  };
+      { id: 3, sender: 'Agent', content: 'Your order will be shipped within the next 24 hours.', time: 'Yesterday', type: 'sent' },
+    ],
+  });
 
-  const mockFolders = [
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterUnread, setFilterUnread] = useState(false);
+  const [filterStarred, setFilterStarred] = useState(false);
+  const [editSnippet, setEditSnippet] = useState(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false);
+  const [newLink, setNewLink] = useState({ name: '', url: '' });
+  const [links, setLinks] = useState([]);
+  const [editLink, setEditLink] = useState(null);
+
+  const tabs = [
+    { id: 'conversations', label: 'Conversations' },
+    { id: 'manualActions', label: 'Manual Actions' },
+    { id: 'snippets', label: 'Snippets' },
+    { id: 'triggerLinks', label: 'Trigger Links' }
+  ];
+
+  const subTabs = [
+    { id: 'unread', label: 'Unread', icon: <FiMessageSquare /> },
+    { id: 'starred', label: 'Starred', icon: <FiStar /> },
+    { id: 'recent', label: 'Recent', icon: <FiClock /> }
+  ];
+
+  const [mockFolders, setMockFolders] = useState([
     { id: 'all', name: 'All Snippets', count: 5 },
     { id: 'welcome', name: 'Welcome Messages', count: 2 },
     { id: 'support', name: 'Support Responses', count: 3 }
-  ];
+  ]);
 
-  const mockSnippets = [
+  const [mockSnippets, setMockSnippets] = useState([
     {
       id: 1,
       name: 'Welcome Message',
@@ -102,7 +118,7 @@ function Conversation() {
       folder: 'welcome',
       type: 'email'
     }
-  ];
+  ]);
 
   const mockActions = [
     {
@@ -123,10 +139,19 @@ function Conversation() {
     }
   ];
 
-  const filteredConversations = mockConversations.filter(conv => {
-    if (activeSubTab === 'unread') return conv.unread;
-    return true;
-  }).filter(conv => {
+  const handleFilterClick = () => {
+    setShowFilterModal(true);
+  };
+
+  const applyFilters = () => {
+    setShowFilterModal(false);
+    // Apply filters to conversations
+    setActiveSubTab('all'); // Reset sub-tab to show all conversations
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    if (filterUnread && !conv.unread) return false;
+    if (filterStarred && !conv.starred) return false;
     if (searchQuery) {
       return conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
              conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
@@ -137,6 +162,144 @@ function Conversation() {
   const filteredSnippets = mockSnippets.filter(snippet => 
     activeFolder === 'all' || snippet.folder === activeFolder
   );
+
+  const handleAddConversation = (e) => {
+    e.preventDefault();
+    const newId = conversations.length + 1;
+    const newConv = { ...newConversation, id: newId };
+    setConversations([...conversations, newConv]);
+    setMessages({ ...messages, [newId]: [] });
+    setNewConversation({
+      name: '',
+      email: '',
+      contact: '',
+      timestamp: new Date().toLocaleTimeString(),
+      unread: true,
+      avatar: '👤'
+    });
+    setShowAddConversationModal(false);
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    const messageContent = e.target.message.value;
+    if (messageContent.trim() === '') return;
+  
+    const newMessage = {
+      id: messages[selectedConversation].length + 1,
+      sender: 'Agent',
+      content: messageContent,
+      time: new Date().toLocaleTimeString(),
+      type: 'sent'
+    };
+  
+    setMessages({
+      ...messages,
+      [selectedConversation]: [...messages[selectedConversation], newMessage]
+    });
+  
+    setConversations(conversations.map(conv => 
+      conv.id === selectedConversation ? { ...conv, lastMessage: messageContent, timestamp: newMessage.time } : conv
+    ));
+  
+    e.target.message.value = '';
+  };
+
+  const handleSaveTextSnippet = () => {
+    const name = document.querySelector('#textSnippetName').value;
+    const content = document.querySelector('#textSnippetContent').value;
+    const folder = document.querySelector('#textSnippetFolder').value;
+    const newSnippet = {
+      id: editSnippet ? editSnippet.id : mockSnippets.length + 1,
+      name,
+      content,
+      folder,
+      type: 'text'
+    };
+    if (editSnippet) {
+      setMockSnippets(mockSnippets.map(snippet => snippet.id === editSnippet.id ? newSnippet : snippet));
+    } else {
+      setMockSnippets([...mockSnippets, newSnippet]);
+      setMockFolders(mockFolders.map(f => f.id === folder ? { ...f, count: f.count + 1 } : f));
+    }
+    setShowTextSnippetModal(false);
+    setEditSnippet(null);
+  };
+
+  const handleSaveEmailSnippet = () => {
+    const name = document.querySelector('#emailSnippetName').value;
+    const subject = document.querySelector('#emailSnippetSubject').value;
+    const content = document.querySelector('#emailSnippetContent').value;
+    const folder = document.querySelector('#emailSnippetFolder').value;
+    const newSnippet = {
+      id: editSnippet ? editSnippet.id : mockSnippets.length + 1,
+      name,
+      subject,
+      content,
+      folder,
+      type: 'email'
+    };
+    if (editSnippet) {
+      setMockSnippets(mockSnippets.map(snippet => snippet.id === editSnippet.id ? newSnippet : snippet));
+    } else {
+      setMockSnippets([...mockSnippets, newSnippet]);
+      setMockFolders(mockFolders.map(f => f.id === folder ? { ...f, count: f.count + 1 } : f));
+    }
+    setShowEmailSnippetModal(false);
+    setEditSnippet(null);
+  };
+
+  const handleCreateFolder = () => {
+    const name = document.querySelector('#folderName').value;
+    const newFolder = {
+      id: name.toLowerCase().replace(/\s+/g, ''),
+      name,
+      count: 0
+    };
+    setMockFolders([...mockFolders, newFolder]);
+    setShowFolderModal(false);
+  };
+
+  const handleEditSnippet = (snippet) => {
+    setEditSnippet(snippet);
+    if (snippet.type === 'text') {
+      setShowTextSnippetModal(true);
+    } else {
+      setShowEmailSnippetModal(true);
+    }
+  };
+
+  const handleDeleteSnippet = (snippetId) => {
+    setMockSnippets(mockSnippets.filter(snippet => snippet.id !== snippetId));
+    setShowDeleteSuccess(true);
+    setTimeout(() => setShowDeleteSuccess(false), 3000);
+  };
+
+  const handleAddLink = (e) => {
+    e.preventDefault();
+    const newId = links.length + 1;
+    const newLinkEntry = { id: newId, ...newLink };
+    setLinks([...links, newLinkEntry]);
+    setNewLink({ name: '', url: '' });
+    setShowAddLinkModal(false);
+  };
+
+  const handleEditLink = (link) => {
+    setEditLink(link);
+    setShowAddLinkModal(true);
+  };
+
+  const handleSaveLink = (e) => {
+    e.preventDefault();
+    const updatedLink = { id: editLink.id, ...newLink };
+    setLinks(links.map(link => link.id === editLink.id ? updatedLink : link));
+    setEditLink(null);
+    setShowAddLinkModal(false);
+  };
+
+  const handleDeleteLink = (linkId) => {
+    setLinks(links.filter(link => link.id !== linkId));
+  };
 
   const renderTriggerLinks = () => {
     return (
@@ -156,7 +319,7 @@ function Conversation() {
               Analyze
             </button>
           </div>
-          <button className="primary-button">Add Link</button>
+          <button className="primary-button" onClick={() => setShowAddLinkModal(true)}>Add Link</button>
         </div>
         
         {activeTriggerTab === 'links' ? (
@@ -165,12 +328,24 @@ function Conversation() {
               <div className="table-header">
                 <div>Name</div>
                 <div>Link URL</div>
-                <div>Link Key</div>
                 <div>Actions</div>
               </div>
-              <div className="empty-state">
-                <p>You do not have any trigger link yet. <a href="#">Click here to create your first trigger link</a></p>
-              </div>
+              {links.length > 0 ? (
+                links.map(link => (
+                  <div key={link.id} className="table-row">
+                    <div>{link.name}</div>
+                    <div>{link.url}</div>
+                    <div className="actions">
+                      <button className="icon-button" onClick={() => handleEditLink(link)}><FiEdit2 /></button>
+                      <button className="icon-button" onClick={() => handleDeleteLink(link.id)}><FiTrash2 /></button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <p>You do not have any trigger link yet. <button onClick={() => setShowAddLinkModal(true)}>Click here to create your first trigger link</button></p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -248,8 +423,8 @@ function Conversation() {
                     <div className="snippet-header">
                       <h3>{snippet.name}</h3>
                       <div className="snippet-actions">
-                        <button className="icon-button"><FiEdit2 /></button>
-                        <button className="icon-button"><FiTrash2 /></button>
+                        <button className="icon-button" onClick={() => handleEditSnippet(snippet)}><FiEdit2 /></button>
+                        <button className="icon-button" onClick={() => handleDeleteSnippet(snippet.id)}><FiTrash2 /></button>
                         <button className="icon-button"><FiMoreVertical /></button>
                       </div>
                     </div>
@@ -270,15 +445,15 @@ function Conversation() {
           <div className="modal-overlay">
             <div className="modal">
               <div className="modal-header">
-                <h3>Create Text Snippet</h3>
-                <button className="close-button" onClick={() => setShowTextSnippetModal(false)}>
+                <h3>{editSnippet ? 'Edit Text Snippet' : 'Create Text Snippet'}</h3>
+                <button className="close-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>
                   <FiX />
                 </button>
               </div>
               <div className="modal-content">
                 <div className="form-group">
                   <label>Name <span className="required">*</span></label>
-                  <input type="text" placeholder="Enter Snippet Name" />
+                  <input id="textSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
                 </div>
                 <div className="form-group">
                   <label>Snippets Body <span className="required">*</span></label>
@@ -288,7 +463,7 @@ function Conversation() {
                       <button><FiPaperclip /></button>
                       <button><FiZap /></button>
                     </div>
-                    <textarea placeholder="Type a message"></textarea>
+                    <textarea id="textSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
                     <div className="editor-footer">
                       <span>Approximate Cost: $0</span>
                       <span>0 characters | 0 words | 0 segs</span>
@@ -296,23 +471,17 @@ function Conversation() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Add file through URL</label>
-                  <div className="url-input">
-                    <input type="text" placeholder="Enter URL" />
-                    <button className="primary-button">Add</button>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Test Snippet</label>
-                  <div className="test-input">
-                    <input type="text" placeholder="Enter phone number" />
-                    <button className="primary-button">Send</button>
-                  </div>
+                  <label>Folder</label>
+                  <select id="textSnippetFolder" defaultValue={editSnippet?.folder || ''}>
+                    {mockFolders.map(folder => (
+                      <option key={folder.id} value={folder.id}>{folder.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="secondary-button" onClick={() => setShowTextSnippetModal(false)}>Cancel</button>
-                <button className="primary-button">Save</button>
+                <button className="secondary-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
+                <button className="primary-button" onClick={handleSaveTextSnippet}>Save</button>
               </div>
             </div>
           </div>
@@ -322,19 +491,19 @@ function Conversation() {
           <div className="modal-overlay">
             <div className="modal">
               <div className="modal-header">
-                <h3>Create Email Snippet</h3>
-                <button className="close-button" onClick={() => setShowEmailSnippetModal(false)}>
+                <h3>{editSnippet ? 'Edit Email Snippet' : 'Create Email Snippet'}</h3>
+                <button className="close-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>
                   <FiX />
                 </button>
               </div>
               <div className="modal-content">
                 <div className="form-group">
                   <label>Name <span className="required">*</span></label>
-                  <input type="text" placeholder="Enter Snippet Name" />
+                  <input id="emailSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
                 </div>
                 <div className="form-group">
                   <label>Subject <span className="required">*</span></label>
-                  <input type="text" placeholder="Enter Subject" />
+                  <input id="emailSnippetSubject" type="text" placeholder="Enter Subject" defaultValue={editSnippet?.subject || ''} />
                 </div>
                 <div className="form-group">
                   <label>Snippets Body <span className="required">*</span></label>
@@ -345,24 +514,24 @@ function Conversation() {
                       <select><option>1.5</option></select>
                       <select><option>Verdana</option></select>
                     </div>
-                    <textarea placeholder="Type a message"></textarea>
+                    <textarea id="emailSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
                     <div className="editor-footer">
                       <span>0 characters | 0 words</span>
                     </div>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Test Email Snippet</label>
-                  <div className="test-email">
-                    <input type="email" placeholder="From Email Address" />
-                    <input type="email" placeholder="To Email Address" />
-                    <button className="primary-button">Send Test</button>
-                  </div>
+                  <label>Folder</label>
+                  <select id="emailSnippetFolder" defaultValue={editSnippet?.folder || ''}>
+                    {mockFolders.map(folder => (
+                      <option key={folder.id} value={folder.id}>{folder.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="secondary-button" onClick={() => setShowEmailSnippetModal(false)}>Cancel</button>
-                <button className="primary-button">Save</button>
+                <button className="secondary-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
+                <button className="primary-button" onClick={handleSaveEmailSnippet}>Save</button>
               </div>
             </div>
           </div>
@@ -380,12 +549,12 @@ function Conversation() {
               <div className="modal-content">
                 <div className="form-group">
                   <label>Folder Name <span className="required">*</span></label>
-                  <input type="text" placeholder="Enter folder name" />
+                  <input id="folderName" type="text" placeholder="Enter folder name" />
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="secondary-button" onClick={() => setShowFolderModal(false)}>Cancel</button>
-                <button className="primary-button">Create Folder</button>
+              <div class="modal-footer">
+                <button class="secondary-button" onClick={() => setShowFolderModal(false)}>Cancel</button>
+                <button class="primary-button" onClick={handleCreateFolder}>Create Folder</button>
               </div>
             </div>
           </div>
@@ -481,10 +650,10 @@ function Conversation() {
                     />
                   </div>
                   <div className="search-actions">
-                    <button className="icon-button">
+                    <button className="icon-button" onClick={handleFilterClick}>
                       <FiFilter />
                     </button>
-                    <button className="icon-button">
+                    <button className="icon-button" onClick={() => setShowAddConversationModal(true)}>
                       <FiPlus />
                     </button>
                   </div>
@@ -523,13 +692,13 @@ function Conversation() {
                     <div className="conversation-header">
                       <div className="contact-info">
                         <div className="avatar">
-                          {mockConversations.find(c => c.id === selectedConversation)?.avatar}
+                          {conversations.find(c => c.id === selectedConversation)?.avatar}
                         </div>
-                        <h3>{mockConversations.find(c => c.id === selectedConversation)?.name}</h3>
+                        <h3>{conversations.find(c => c.id === selectedConversation)?.name}</h3>
                       </div>
                     </div>
                     <div className="messages-container">
-                      {mockMessages[selectedConversation].map(message => (
+                      {messages[selectedConversation].map(message => (
                         <div key={message.id} className={`message ${message.type}`}>
                           <div className="message-content">
                             <p>{message.content}</p>
@@ -539,8 +708,10 @@ function Conversation() {
                       ))}
                     </div>
                     <div className="message-input">
-                      <input type="text" placeholder="Type your message..." />
-                      <button className="send-button">Send</button>
+                      <form onSubmit={handleSendMessage}>
+                        <input type="text" name="message" placeholder="Type your message..." />
+                        <button className="send-button" type="submit">Send</button>
+                      </form>
                     </div>
                   </div>
                 ) : (
@@ -557,14 +728,16 @@ function Conversation() {
                   <div className="contact-info-panel">
                     <div className="contact-header">
                       <div className="large-avatar">
-                        {mockConversations.find(c => c.id === selectedConversation)?.avatar}
+                        {conversations.find(c => c.id === selectedConversation)?.avatar}
                       </div>
-                      <h3>{mockConversations.find(c => c.id === selectedConversation)?.name}</h3>
+                      <h3>{conversations.find(c => c.id === selectedConversation)?.name}</h3>
                     </div>
                     <div className="contact-details-content">
                       <div className="detail-section">
                         <h4>Contact Information</h4>
                         <p><FiUser /> Customer since 2023</p>
+                        <p><FiPhone /> {conversations.find(c => c.id === selectedConversation)?.contact || 'N/A'}</p>
+                        <p><FiMail /> {conversations.find(c => c.id === selectedConversation)?.email || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -584,6 +757,145 @@ function Conversation() {
           {activeTab === 'triggerLinks' && renderTriggerLinks()}
         </div>
       </div>
+
+      {showAddConversationModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Add New Conversation</h3>
+              <button className="close-button" onClick={() => setShowAddConversationModal(false)}>
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-content">
+              <form onSubmit={handleAddConversation}>
+                <div className="form-group">
+                  <label>Name <span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter Name" 
+                    value={newConversation.name}
+                    onChange={(e) => setNewConversation({ ...newConversation, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email <span className="required">*</span></label>
+                  <input 
+                    type="email" 
+                    placeholder="Enter Email" 
+                    value={newConversation.email}
+                    onChange={(e) => setNewConversation({ ...newConversation, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Contact <span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter Contact" 
+                    value={newConversation.contact}
+                    onChange={(e) => setNewConversation({ ...newConversation, contact: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button className="secondary-button" onClick={() => setShowAddConversationModal(false)}>Cancel</button>
+                  <button className="primary-button" type="submit">Add Conversation</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFilterModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Filter Conversations</h3>
+              <button className="close-button" onClick={() => setShowFilterModal(false)}>
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="form-group">
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={filterUnread} 
+                    onChange={(e) => setFilterUnread(e.target.checked)} 
+                  />
+                  Unread
+                </label>
+              </div>
+              <div className="form-group">
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={filterStarred} 
+                    onChange={(e) => setFilterStarred(e.target.checked)} 
+                  />
+                  Starred
+                </label>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="secondary-button" onClick={() => setShowFilterModal(false)}>Cancel</button>
+              <button className="primary-button" onClick={applyFilters}>Apply Filters</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddLinkModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>{editLink ? 'Edit Link' : 'Add New Link'}</h3>
+              <button className="close-button" onClick={() => { setShowAddLinkModal(false); setEditLink(null); }}>
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-content">
+              <form onSubmit={editLink ? handleSaveLink : handleAddLink}>
+                <div className="form-group">
+                  <label>Name <span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter Link Name" 
+                    value={newLink.name}
+                    onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Link URL <span className="required">*</span></label>
+                  <input 
+                    type="url" 
+                    placeholder="Enter Link URL" 
+                    value={newLink.url}
+                    onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="modal-footer">
+                  <>
+                    <button className="secondary-button" onClick={() => { setShowAddLinkModal(false); setEditLink(null); }}>Cancel</button>
+                    <button className="primary-button" type="submit">{editLink ? 'Save Changes' : 'Add Link'}</button>
+                  </>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteSuccess && (
+        <div className="notification success">
+          Snippet deleted successfully
+        </div>
+      )}
     </div>
   );
 }

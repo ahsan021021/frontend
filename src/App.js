@@ -10,6 +10,7 @@ import Calendar from './pages/Calendar/Calendar';
 import OpportunitiesPage from './pages/Opportunities/OpportunitiesPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import Conversation from './pages/Conversation/Conversation';
+import Email from './pages/Email/Email';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/settings" element={<SettingsPage/>}/>
         <Route path='/conversation' element={<Conversation/>}/>
+        <Route path='/email' element={<Email/>}/>
         
         
         <Route path='/opportunities/*' element={<OpportunitiesPage/>}/>

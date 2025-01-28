@@ -551,3 +551,71 @@ html, body {
 .submit-btn:hover {
   background: darken(var(--primary-color), 10%);
 }
+
+/* Pending Meetings */
+.pending-meetings {
+  background-color: #1E1E1E;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.pending-meeting-card {
+  background-color: var(--red-900);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pending-meeting-card:hover {
+  background-color: var(--red-800);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pending-meeting-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.pending-meeting-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--gray-300);
+  gap: 1rem;
+}
+
+.pending-meeting-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pending-meeting-info-item svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-restore {
+  background-color: var(--gray-800);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-restore:hover {
+  background-color: var(--gray-700);
+}

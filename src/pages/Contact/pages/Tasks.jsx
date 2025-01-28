@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Contacts from './Contacts'; // Ensure Contacts is imported correctly
 
 function Tasks() { // Remove contacts prop
   const [tasks, setTasks] = useState([]);
@@ -13,6 +12,13 @@ function Tasks() { // Remove contacts prop
     assignee: ''
   });
   const [selectedTasks, setSelectedTasks] = useState([]);
+
+  // Mock data for contacts
+  const mockContacts = [
+    { id: 1, name: 'John Doe' },
+    { id: 2, name: 'Jane Smith' },
+    { id: 3, name: 'Alice Johnson' }
+  ];
 
   const handleNewTaskClick = () => {
     setIsTaskPopupOpen(true);
@@ -159,7 +165,7 @@ function Tasks() { // Remove contacts prop
                   required
                 >
                   <option value="">Select Contact</option>
-                  {Contacts.map(contact => (
+                  {mockContacts.map(contact => (
                     <option key={contact.id} value={contact.name}>{contact.name}</option>
                   ))}
                 </select>
@@ -174,7 +180,7 @@ function Tasks() { // Remove contacts prop
                   required
                 >
                   <option value="">Assign To</option>
-                  {Contacts.map(contact => (
+                  {mockContacts.map(contact => (
                     <option key={contact.id} value={contact.name}>{contact.name}</option>
                   ))}
                 </select>

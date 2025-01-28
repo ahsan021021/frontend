@@ -109,126 +109,138 @@ const Companies = () => {
             <button className="close-popup" onClick={closePopup}>✖</button>
             {popupContent === 'Add New Company' && (
               <form onSubmit={handleSubmit} className="company-form">
+                <div className='company-stuffs'>
                 <h3>Add New Company</h3>
-                <div className="form-group">
-                  <label htmlFor="name">Company Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Company Name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="name">Company Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      placeholder="Company Name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone</label>
+                    <input
+                      type="text"
+                      id="phone"
+                      name="phone"
+                      placeholder="Phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="phone">Phone</label>
-                  <input
-                    type="text"
-                    id="phone"
-                    name="phone"
-                    placeholder="Phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      id="website"
+                      name="website"
+                      placeholder="Website"
+                      value={formData.website}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="address">Address</label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      placeholder="Address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="state">State</label>
+                    <input
+                      type="text"
+                      id="state"
+                      name="state"
+                      placeholder="State"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="website">Website</label>
-                  <input
-                    type="text"
-                    id="website"
-                    name="website"
-                    placeholder="Website"
-                    value={formData.website}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="city">City</label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <input
+                      type="text"
+                      id="description"
+                      name="description"
+                      placeholder="Description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="address">Address</label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    placeholder="Address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="postalCode">Postal Code</label>
+                    <input
+                      type="text"
+                      id="postalCode"
+                      name="postalCode"
+                      placeholder="Postal Code"
+                      value={formData.postalCode}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="country">Country</label>
+                    <input
+                      type="text"
+                      id="country"
+                      name="country"
+                      placeholder="Country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="state">State</label>
-                  <input
-                    type="text"
-                    id="state"
-                    name="state"
-                    placeholder="State"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="city">City</label>
-                  <input
-                    type="text"
-                    id="city"
-                    name="city"
-                    placeholder="City"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="description">Description</label>
-                  <input
-                    type="text"
-                    id="description"
-                    name="description"
-                    placeholder="Description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="postalCode">Postal Code</label>
-                  <input
-                    type="text"
-                    id="postalCode"
-                    name="postalCode"
-                    placeholder="Postal Code"
-                    value={formData.postalCode}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="country">Country</label>
-                  <input
-                    type="text"
-                    id="country"
-                    name="country"
-                    placeholder="Country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    required
-                  />
                 </div>
                 <button type="submit" className="submit-btn">Save</button>
               </form>

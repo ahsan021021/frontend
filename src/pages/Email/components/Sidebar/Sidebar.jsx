@@ -1,7 +1,6 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faBolt, faBrain, faTachometerAlt, faAddressBook, faComments, faCalendarAlt, faCreditCard, faEnvelope, faFileAlt, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faBolt, faTachometerAlt, faAddressBook, faComments, faCalendarAlt, faCreditCard, faEnvelope, faFileAlt, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import "./Sidebar.css";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
@@ -37,35 +36,35 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           </div>
         </div>
         <div className="menu">
-          <NavLink to="/dashboard" activeClassName="active">
+          <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faTachometerAlt} className="menu-icon" /> Dashboard
           </NavLink>
-          <NavLink to="/contact" activeClassName="active">
+          <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faAddressBook} className="menu-icon" /> Contact
           </NavLink>
-          <NavLink to="/conversation" activeClassName="active">
+          <NavLink to="/conversation" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faComments} className="menu-icon" /> Conversation
           </NavLink>
-          <NavLink to="/calendar" activeClassName="active">
+          <NavLink to="/calendar" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faCalendarAlt} className="menu-icon" /> Calendar
           </NavLink>
-          <NavLink to="/opportunities" activeClassName="active">
+          <NavLink to="/opportunities" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faCreditCard} className="menu-icon" /> Opportunities
           </NavLink>
-          <NavLink to="/email" activeClassName="active">
+          <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faEnvelope} className="menu-icon" /> Email Marketing
           </NavLink>
-          <NavLink to="http://localhost:8080/" activeClassName="active">
+          <NavLink to="http://localhost:8080/" className={({ isActive }) => isActive ? 'active' : ''}>
             <FontAwesomeIcon icon={faFileAlt} className="menu-icon" /> Landing Page Builder
           </NavLink>
         </div>
         <hr className="menu-divider" />
       </div>
       <div className="bottom-menu">
-        <NavLink to="/settings" activeClassName="active">
+        <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''}>
           <FontAwesomeIcon icon={faCog} className="menu-icon" /> Settings
         </NavLink>
-        <NavLink to="/login" activeClassName="active">
+        <NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''}>
           <FontAwesomeIcon icon={faSignOutAlt} className="menu-icon" /> Logout
         </NavLink>
       </div>

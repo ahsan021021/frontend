@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from "../../components/Sidebar";
+import Sidebar from '../../components/SideBar';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, addDays, isToday, setMonth, setYear } from 'date-fns';
-import { FaChevronLeft, FaChevronRight, FaClock, FaVideo, FaEnvelope, FaTimes } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaClock, FaVideo, FaEnvelope, FaTimes, FaUndo } from 'react-icons/fa';
 import { Toaster, toast } from 'react-hot-toast';
 import './Calendar.css';
 
@@ -18,6 +18,7 @@ function Calendar() {
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showCancelReason, setShowCancelReason] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [pendingMeetings, setPendingMeetings] = useState([]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -77,6 +78,8 @@ function Calendar() {
         return isSameDay(meetingDate, today) && meetingDate > now;
       case 'all':
         return true;
+      case 'restore':
+        return false; // No meetings to show in the main timeline for restore tab
       default:
         return true;
     }
@@ -133,7 +136,7 @@ function Calendar() {
     setShowAddEvent(false);
     setNewEvent({
       title: '',
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(selectedDate, 'yyyy-MM-dd'), // Use selected date as default
       startTime: '09:00',
       duration: 30,
       email: ''
@@ -142,6 +145,8 @@ function Calendar() {
   };
 
   const handleDeleteMeeting = (id) => {
+    const meetingToDelete = meetings.find(meeting => meeting.id === id);
+    setPendingMeetings([...pendingMeetings, meetingToDelete]);
     setMeetings(meetings.filter(meeting => meeting.id !== id));
     setShowMeetingDetails(null);
     toast.success('Meeting cancelled successfully');
@@ -156,6 +161,13 @@ function Calendar() {
     handleDeleteMeeting(showMeetingDetails.id);
     setShowCancelReason(false);
     setCancelReason('');
+  };
+
+  const handleRestoreMeeting = (id) => {
+    const meetingToRestore = pendingMeetings.find(meeting => meeting.id === id);
+    setMeetings([...meetings, meetingToRestore]);
+    setPendingMeetings(pendingMeetings.filter(meeting => meeting.id !== id));
+    toast.success('Meeting restored successfully');
   };
 
   useEffect(() => {
@@ -197,6 +209,7 @@ function Calendar() {
             <TabButton tab="upcoming" label="Upcoming" />
             <TabButton tab="pending" label="Pending" />
             <TabButton tab="all" label="All" />
+            <TabButton tab="restore" label="Restore" /> {/* New Restore tab */}
           </div>
           {isMobile && (
             <button
@@ -210,36 +223,72 @@ function Calendar() {
 
         <div className="main-grid">
           <div className="timeline">
-            {filteredMeetings.length === 0 ? (
-              <div className="empty-state">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <h3 className="empty-state-title">No Upcoming Events</h3>
-                <p>Click "Add Event" to schedule a new meeting</p>
-              </div>
-            ) : (
-              <div>
-                {filteredMeetings.map((meeting) => (
-                  <div
-                    key={meeting.id}
-                    onClick={() => setShowMeetingDetails(meeting)}
-                    className="meeting-card"
-                  >
-                    <div className="meeting-title">{meeting.title}</div>
-                    <div className="meeting-info">
-                      <div className="meeting-info-item">
-                        <FaClock className="w-4 h-4" />
-                        {meeting.startTime} ({meeting.duration} min)
+            {activeTab === 'restore' ? (
+              pendingMeetings.length === 0 ? (
+                <div className="empty-state">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h3 className="empty-state-title">No Cancelled Meetings</h3>
+                  <p>There are no meetings to restore</p>
+                </div>
+              ) : (
+                <div>
+                  {pendingMeetings.map((meeting) => (
+                    <div key={meeting.id} className="pending-meeting-card">
+                      <div className="pending-meeting-title">{meeting.title}</div>
+                      <div className="pending-meeting-info">
+                        <div className="pending-meeting-info-item">
+                          <FaClock className="w-4 h-4" />
+                          {meeting.startTime} ({meeting.duration} min)
+                        </div>
+                        <div className="pending-meeting-info-item">
+                          <FaEnvelope className="w-4 h-4" />
+                          {meeting.email}
+                        </div>
                       </div>
-                      <div className="meeting-info-item">
-                        <FaEnvelope className="w-4 h-4" />
-                        {meeting.email}
+                      <button
+                        onClick={() => handleRestoreMeeting(meeting.id)}
+                        className="btn btn-restore"
+                      >
+                        <FaUndo className="w-4 h-4" /> Restore
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              filteredMeetings.length === 0 ? (
+                <div className="empty-state">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h3 className="empty-state-title">No Upcoming Events</h3>
+                  <p>Click "Add Event" to schedule a new meeting</p>
+                </div>
+              ) : (
+                <div>
+                  {filteredMeetings.map((meeting) => (
+                    <div
+                      key={meeting.id}
+                      onClick={() => setShowMeetingDetails(meeting)}
+                      className="meeting-card"
+                    >
+                      <div className="meeting-title">{meeting.title}</div>
+                      <div className="meeting-info">
+                        <div className="meeting-info-item">
+                          <FaClock className="w-4 h-4" />
+                          {format(new Date(`${meeting.date}T${meeting.startTime}`), 'EEEE, MMMM d, yyyy')} at {meeting.startTime} ({meeting.duration} min)
+                        </div>
+                        <div className="meeting-info-item">
+                          <FaEnvelope className="w-4 h-4" />
+                          {meeting.email}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
             )}
           </div>
 
@@ -315,7 +364,7 @@ function Calendar() {
                     !isCurrentMonth && 'other-month',
                     isSameDay(day, selectedDate) && 'selected',
                     hasEvent && 'has-event',
-                    isToday(day) && 'selected'
+                    isToday(day) && !isSameDay(day, selectedDate) && 'today' // Ensure only one date is selected
                   ].filter(Boolean).join(' ');
 
                   return (
@@ -331,7 +380,13 @@ function Calendar() {
               </div>
 
               <button
-                onClick={() => setShowAddEvent(true)}
+                onClick={() => {
+                  setShowAddEvent(true);
+                  setNewEvent({
+                    ...newEvent,
+                    date: format(selectedDate, 'yyyy-MM-dd') // Set selected date when opening the form
+                  });
+                }}
                 className="add-event-btn"
               >
                 ADD EVENT
@@ -353,7 +408,7 @@ function Calendar() {
               <div className="meeting-info">
                 <div className="meeting-info-item">
                   <FaClock className="w-5 h-5" />
-                  <div>{showMeetingDetails.duration} min</div>
+                  <div>{format(new Date(`${showMeetingDetails.date}T${showMeetingDetails.startTime}`), 'EEEE, MMMM d, yyyy')} at {showMeetingDetails.startTime} ({showMeetingDetails.duration} min)</div>
                 </div>
                 <div className="meeting-info-item">
                   <FaVideo className="w-5 h-5" />
