@@ -11,11 +11,13 @@ import OpportunitiesPage from './pages/Opportunities/OpportunitiesPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import Conversation from './pages/Conversation/Conversation';
 import Email from './pages/Email/Email';
+import ImportCsvPage from './pages/ImportPage/ImportCsvPage';
 
 const App = () => {
   return (
     <Router>
       <Routes>
+
         <Route path="/" element={<Start />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify-email" element={<Verification />} />
@@ -26,6 +28,7 @@ const App = () => {
         <Route path="/settings" element={<SettingsPage/>}/>
         <Route path='/conversation' element={<Conversation/>}/>
         <Route path='/email' element={<Email/>}/>
+        <Route path='/import' element={<ImportCsvPage/>}/>
         
         
         <Route path='/opportunities/*' element={<OpportunitiesPage/>}/>

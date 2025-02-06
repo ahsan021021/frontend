@@ -17,7 +17,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
         <div className="profile-container">
           <div className="profile">
             <img
-              src="https://icon-library.com/images/unknown-person-icon/unknown-person-icon-10.jpg"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIs3peZbmHi0e-uTv4_RB4RWFfqEzE7BNNSg&s"
               alt="Profile of Kaneer Kerla"
               width="50"
               height="50"

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiPlus, FiUser, FiMessageSquare, FiStar, FiClock, FiX, FiSmile, FiPaperclip, FiZap, FiFolder, FiEdit2, FiTrash2, FiMoreVertical, FiPhone, FiMail } from 'react-icons/fi';
 import Sidebar from '../../components/Sidebar'; // Import Sidebar component
+import axios from 'axios'; // Import Axios
 import './Conversation.css';
 
 const Conversation = () => {
@@ -23,49 +24,8 @@ const Conversation = () => {
     unread: true,
     avatar: '👤'
   });
-  const [conversations, setConversations] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      lastMessage: 'Hey, I need help with my recent order',
-      timestamp: '10:30 AM',
-      unread: true,
-      avatar: '🧑‍💼'
-    },
-    {
-      id: 2,
-      name: 'Sarah Smith',
-      lastMessage: 'Thank you for your assistance!',
-      timestamp: '9:45 AM',
-      unread: true,
-      avatar: '👩'
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      lastMessage: 'When will my order be shipped?',
-      timestamp: 'Yesterday',
-      unread: false,
-      avatar: '👨'
-    }
-  ]);
-  const [messages, setMessages] = useState({
-    1: [
-      { id: 1, sender: 'John Doe', content: 'Hey, I need help with my recent order', time: '10:30 AM', type: 'received' },
-      { id: 2, sender: 'Agent', content: 'Hello John! I\'d be happy to help. Could you please provide your order number?', time: '10:31 AM', type: 'sent' },
-      { id: 3, sender: 'John Doe', content: 'Sure, it\'s #ORD123456', time: '10:32 AM', type: 'received' },
-    ],
-    2: [
-      { id: 1, sender: 'Sarah Smith', content: 'Thank you for your assistance!', time: '9:45 AM', type: 'received' },
-      { id: 2, sender: 'Agent', content: 'You\'re welcome! Let me know if you need anything else.', time: '9:46 AM', type: 'sent' },
-    ],
-    3: [
-      { id: 1, sender: 'Mike Johnson', content: 'When will my order be shipped?', time: 'Yesterday', type: 'received' },
-      { id: 2, sender: 'Agent', content: 'Let me check that for you right away.', time: 'Yesterday', type: 'sent' },
-      { id: 3, sender: 'Agent', content: 'Your order will be shipped within the next 24 hours.', time: 'Yesterday', type: 'sent' },
-    ],
-  });
-
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState({});
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filterUnread, setFilterUnread] = useState(false);
   const [filterStarred, setFilterStarred] = useState(false);
@@ -75,542 +35,355 @@ const Conversation = () => {
   const [newLink, setNewLink] = useState({ name: '', url: '' });
   const [links, setLinks] = useState([]);
   const [editLink, setEditLink] = useState(null);
+  const [mockFolders, setMockFolders] = useState([]);
+  const [mockSnippets, setMockSnippets] = useState([]);
+  const [mockActions, setMockActions] = useState([]);
 
-  const tabs = [
-    { id: 'conversations', label: 'Conversations' },
-    { id: 'manualActions', label: 'Manual Actions' },
-    { id: 'snippets', label: 'Snippets' },
-    { id: 'triggerLinks', label: 'Trigger Links' }
-  ];
+  // Fetch conversations on component mount
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/conversations');
+        setConversations(response.data);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      }
+    };
+    fetchConversations();
+  }, []);
 
-  const subTabs = [
-    { id: 'unread', label: 'Unread', icon: <FiMessageSquare /> },
-    { id: 'starred', label: 'Starred', icon: <FiStar /> },
-    { id: 'recent', label: 'Recent', icon: <FiClock /> }
-  ];
+// Fetch messages for the selected conversation
+useEffect(() => {
+  if (selectedConversation) {
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/messages/${selectedConversation._id}`);
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [selectedConversation._id]: response.data,
+        }));
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+    fetchMessages();
+  }
+}, [selectedConversation]);
 
-  const [mockFolders, setMockFolders] = useState([
-    { id: 'all', name: 'All Snippets', count: 5 },
-    { id: 'welcome', name: 'Welcome Messages', count: 2 },
-    { id: 'support', name: 'Support Responses', count: 3 }
-  ]);
+  // Fetch snippets and folders when the snippets tab is active
+  useEffect(() => {
+    if (activeTab === 'snippets') {
+      const fetchSnippets = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/api/snippets');
+          setMockSnippets(response.data);
+        } catch (error) {
+          console.error('Error fetching snippets:', error);
+        }
+      };
+      fetchSnippets();
 
-  const [mockSnippets, setMockSnippets] = useState([
-    {
-      id: 1,
-      name: 'Welcome Message',
-      content: 'Hello! Welcome to our support. How can I assist you today?',
-      folder: 'welcome',
-      type: 'text'
-    },
-    {
-      id: 2,
-      name: 'Order Status',
-      content: 'I\'ll help you check the status of your order. Could you please provide your order number?',
-      folder: 'support',
-      type: 'text'
-    },
-    {
-      id: 3,
-      name: 'Thank You Email',
-      subject: 'Thank You for Your Purchase',
-      content: 'Dear customer,\n\nThank you for your recent purchase...',
-      folder: 'welcome',
-      type: 'email'
+      const fetchFolders = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/api/folders');
+          setMockFolders(response.data);
+        } catch (error) {
+          console.error('Error fetching folders:', error);
+        }
+      };
+      fetchFolders();
     }
-  ]);
+  }, [activeTab]);
 
-  const mockActions = [
-    {
-      id: 1,
-      title: 'Review Order #12345',
-      description: 'Customer reported issues with their recent order',
-      assignee: 'John Doe',
-      priority: 'High',
-      dueDate: '2023-07-20'
-    },
-    {
-      id: 2,
-      title: 'Update Shipping Address',
-      description: 'Customer requested address change for order #54321',
-      assignee: 'Sarah Smith',
-      priority: 'Medium',
-      dueDate: '2023-07-21'
+  // Fetch manual actions when the manualActions tab is active
+  useEffect(() => {
+    if (activeTab === 'manualActions') {
+      const fetchManualActions = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/api/manual-actions');
+          setMockActions(response.data);
+        } catch (error) {
+          console.error('Error fetching manual actions:', error);
+        }
+      };
+      fetchManualActions();
     }
-  ];
+  }, [activeTab]);
 
-  const handleFilterClick = () => {
-    setShowFilterModal(true);
-  };
-
-  const applyFilters = () => {
-    setShowFilterModal(false);
-    // Apply filters to conversations
-    setActiveSubTab('all'); // Reset sub-tab to show all conversations
-  };
-
-  const filteredConversations = conversations.filter(conv => {
-    if (filterUnread && !conv.unread) return false;
-    if (filterStarred && !conv.starred) return false;
-    if (searchQuery) {
-      return conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+  // Fetch trigger links when the triggerLinks tab is active
+  useEffect(() => {
+    if (activeTab === 'triggerLinks') {
+      const fetchTriggerLinks = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/api/trigger-links');
+          setLinks(response.data);
+        } catch (error) {
+          console.error('Error fetching trigger links:', error);
+        }
+      };
+      fetchTriggerLinks();
     }
-    return true;
-  });
+  }, [activeTab]);
 
-  const filteredSnippets = mockSnippets.filter(snippet => 
-    activeFolder === 'all' || snippet.folder === activeFolder
-  );
-
-  const handleAddConversation = (e) => {
+  // Handle adding a new conversation
+  const handleAddConversation = async (e) => {
     e.preventDefault();
-    const newId = conversations.length + 1;
-    const newConv = { ...newConversation, id: newId };
-    setConversations([...conversations, newConv]);
-    setMessages({ ...messages, [newId]: [] });
-    setNewConversation({
-      name: '',
-      email: '',
-      contact: '',
-      timestamp: new Date().toLocaleTimeString(),
-      unread: true,
-      avatar: '👤'
-    });
-    setShowAddConversationModal(false);
+    try {
+      const response = await axios.post('http://localhost:5000/api/conversations', newConversation);
+      setConversations([...conversations, response.data]);
+      setMessages({ ...messages, [response.data.id]: [] });
+      setNewConversation({
+        name: '',
+        email: '',
+        contact: '',
+        timestamp: new Date().toLocaleTimeString(),
+        unread: true,
+        avatar: '👤'
+      });
+      setShowAddConversationModal(false);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
   };
 
-  const handleSendMessage = (e) => {
+  // Handle sending a message
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     const messageContent = e.target.message.value;
     if (messageContent.trim() === '') return;
-  
-    const newMessage = {
-      id: messages[selectedConversation].length + 1,
-      sender: 'Agent',
-      content: messageContent,
-      time: new Date().toLocaleTimeString(),
-      type: 'sent'
-    };
-  
-    setMessages({
-      ...messages,
-      [selectedConversation]: [...messages[selectedConversation], newMessage]
-    });
-  
-    setConversations(conversations.map(conv => 
-      conv.id === selectedConversation ? { ...conv, lastMessage: messageContent, timestamp: newMessage.time } : conv
-    ));
-  
-    e.target.message.value = '';
+
+    try {
+      const newMessage = {
+        conversationId: selectedConversation,
+        sender: 'Agent',
+        content: messageContent,
+        time: new Date().toLocaleTimeString(),
+        type: 'sent'
+      };
+      const response = await axios.post('http://localhost:5000/api/messages', newMessage);
+      setMessages({
+        ...messages,
+        [selectedConversation]: [...messages[selectedConversation], response.data],
+      });
+      setConversations((prevConversations) =>
+        prevConversations.map((conv) =>
+          conv.id === selectedConversation
+            ? { ...conv, lastMessage: messageContent, timestamp: newMessage.time }
+            : conv
+        )
+      );
+      e.target.message.value = '';
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
-  const handleSaveTextSnippet = () => {
+  // Handle saving a text snippet
+  const handleSaveTextSnippet = async () => {
     const name = document.querySelector('#textSnippetName').value;
     const content = document.querySelector('#textSnippetContent').value;
     const folder = document.querySelector('#textSnippetFolder').value;
-    const newSnippet = {
-      id: editSnippet ? editSnippet.id : mockSnippets.length + 1,
-      name,
-      content,
-      folder,
-      type: 'text'
-    };
-    if (editSnippet) {
-      setMockSnippets(mockSnippets.map(snippet => snippet.id === editSnippet.id ? newSnippet : snippet));
-    } else {
-      setMockSnippets([...mockSnippets, newSnippet]);
-      setMockFolders(mockFolders.map(f => f.id === folder ? { ...f, count: f.count + 1 } : f));
+
+    try {
+      const newSnippet = {
+        name,
+        content,
+        folder,
+        type: 'text'
+      };
+      if (editSnippet) {
+        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        setMockSnippets((prevSnippets) =>
+          prevSnippets.map((snippet) =>
+            snippet.id === editSnippet.id ? response.data : snippet
+          )
+        );
+      } else {
+        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        setMockSnippets([...mockSnippets, response.data]);
+        setMockFolders((prevFolders) =>
+          prevFolders.map((f) =>
+            f.id === folder ? { ...f, count: f.count + 1 } : f
+          )
+        );
+      }
+      setShowTextSnippetModal(false);
+      setEditSnippet(null);
+    } catch (error) {
+      console.error('Error saving snippet:', error);
     }
-    setShowTextSnippetModal(false);
-    setEditSnippet(null);
   };
 
-  const handleSaveEmailSnippet = () => {
+  // Handle saving an email snippet
+  const handleSaveEmailSnippet = async () => {
     const name = document.querySelector('#emailSnippetName').value;
     const subject = document.querySelector('#emailSnippetSubject').value;
     const content = document.querySelector('#emailSnippetContent').value;
     const folder = document.querySelector('#emailSnippetFolder').value;
-    const newSnippet = {
-      id: editSnippet ? editSnippet.id : mockSnippets.length + 1,
-      name,
-      subject,
-      content,
-      folder,
-      type: 'email'
-    };
-    if (editSnippet) {
-      setMockSnippets(mockSnippets.map(snippet => snippet.id === editSnippet.id ? newSnippet : snippet));
-    } else {
-      setMockSnippets([...mockSnippets, newSnippet]);
-      setMockFolders(mockFolders.map(f => f.id === folder ? { ...f, count: f.count + 1 } : f));
+
+    try {
+      const newSnippet = {
+        name,
+        subject,
+        content,
+        folder,
+        type: 'email'
+      };
+      if (editSnippet) {
+        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        setMockSnippets((prevSnippets) =>
+          prevSnippets.map((snippet) =>
+            snippet.id === editSnippet.id ? response.data : snippet
+          )
+        );
+      } else {
+        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        setMockSnippets([...mockSnippets, response.data]);
+        setMockFolders((prevFolders) =>
+          prevFolders.map((f) =>
+            f.id === folder ? { ...f, count: f.count + 1 } : f
+          )
+        );
+      }
+      setShowEmailSnippetModal(false);
+      setEditSnippet(null);
+    } catch (error) {
+      console.error('Error saving snippet:', error);
     }
-    setShowEmailSnippetModal(false);
-    setEditSnippet(null);
   };
 
-  const handleCreateFolder = () => {
+  // Handle creating a folder
+  const handleCreateFolder = async () => {
     const name = document.querySelector('#folderName').value;
-    const newFolder = {
-      id: name.toLowerCase().replace(/\s+/g, ''),
-      name,
-      count: 0
-    };
-    setMockFolders([...mockFolders, newFolder]);
-    setShowFolderModal(false);
+
+    try {
+      const newFolder = {
+        name,
+        count: 0
+      };
+      const response = await axios.post('http://localhost:5000/api/folders', newFolder);
+      setMockFolders([...mockFolders, response.data]);
+      setShowFolderModal(false);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+    }
   };
+
+  // Handle deleting a snippet
+  const handleDeleteSnippet = async (snippetId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/snippets/${snippetId}`);
+      setMockSnippets((prevSnippets) =>
+        prevSnippets.filter((snippet) => snippet.id !== snippetId)
+      );
+      setShowDeleteSuccess(true);
+      setTimeout(() => setShowDeleteSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error deleting snippet:', error);
+    }
+  };
+
+  // Handle adding a trigger link
+  const handleAddLink = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:5000/api/trigger-links', newLink);
+      setLinks([...links, response.data]);
+      setNewLink({ name: '', url: '' });
+      setShowAddLinkModal(false);
+    } catch (error) {
+      console.error('Error adding link:', error);
+    }
+  };
+
+  // Handle saving a trigger link
+  const handleSaveLink = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedLink = { id: editLink.id, ...newLink };
+      const response = await axios.put(`http://localhost:5000/api/trigger-links/${editLink.id}`, updatedLink);
+      setLinks((prevLinks) =>
+        prevLinks.map((link) =>
+          link.id === editLink.id ? response.data : link
+        )
+      );
+      setEditLink(null);
+      setShowAddLinkModal(false);
+    } catch (error) {
+      console.error('Error saving link:', error);
+    }
+  };
+
+  // Handle deleting a trigger link
+  const handleDeleteLink = async (linkId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/trigger-links/${linkId}`);
+      setLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
+    } catch (error) {
+      console.error('Error deleting link:', error);
+    }
+  };
+
+  // Filter conversations based on search query and filters
+  const filteredConversations = conversations.filter((conv) => {
+    if (filterUnread && !conv.unread) return false;
+    if (filterStarred && !conv.starred) return false;
+    if (searchQuery) {
+      return (
+        conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return true;
+  });
+
+  // Filter snippets based on active folder
+  const filteredSnippets = mockSnippets.filter((snippet) =>
+    activeFolder === 'all' || snippet.folder === activeFolder
+  );
 
   const handleEditSnippet = (snippet) => {
     setEditSnippet(snippet);
     if (snippet.type === 'text') {
       setShowTextSnippetModal(true);
-    } else {
+    } else if (snippet.type === 'email') {
       setShowEmailSnippetModal(true);
     }
   };
 
-  const handleDeleteSnippet = (snippetId) => {
-    setMockSnippets(mockSnippets.filter(snippet => snippet.id !== snippetId));
-    setShowDeleteSuccess(true);
-    setTimeout(() => setShowDeleteSuccess(false), 3000);
+  const applyFilters = () => {
+    setShowFilterModal(false);
   };
 
-  const handleAddLink = (e) => {
-    e.preventDefault();
-    const newId = links.length + 1;
-    const newLinkEntry = { id: newId, ...newLink };
-    setLinks([...links, newLinkEntry]);
-    setNewLink({ name: '', url: '' });
-    setShowAddLinkModal(false);
+  const handleConversationClick = (conversation) => {
+    setSelectedConversation(conversation);
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/messages/${conversation._id}`);
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [conversation._id]: response.data,
+        }));
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+    fetchMessages();
   };
 
-  const handleEditLink = (link) => {
-    setEditLink(link);
-    setShowAddLinkModal(true);
-  };
-
-  const handleSaveLink = (e) => {
-    e.preventDefault();
-    const updatedLink = { id: editLink.id, ...newLink };
-    setLinks(links.map(link => link.id === editLink.id ? updatedLink : link));
-    setEditLink(null);
-    setShowAddLinkModal(false);
-  };
-
-  const handleDeleteLink = (linkId) => {
-    setLinks(links.filter(link => link.id !== linkId));
-  };
-
-  const renderTriggerLinks = () => {
-    return (
-      <div className="trigger-links">
-        <div className="trigger-links-header">
-          <div className="trigger-links-tabs">
-            <button 
-              className={`tab ${activeTriggerTab === 'links' ? 'active' : ''}`}
-              onClick={() => setActiveTriggerTab('links')}
-            >
-              Links
-            </button>
-            <button 
-              className={`tab ${activeTriggerTab === 'analyze' ? 'active' : ''}`}
-              onClick={() => setActiveTriggerTab('analyze')}
-            >
-              Analyze
-            </button>
-          </div>
-          <button className="primary-button" onClick={() => setShowAddLinkModal(true)}>Add Link</button>
-        </div>
-        
-        {activeTriggerTab === 'links' ? (
-          <div className="trigger-links-content">
-            <div className="trigger-links-table">
-              <div className="table-header">
-                <div>Name</div>
-                <div>Link URL</div>
-                <div>Actions</div>
-              </div>
-              {links.length > 0 ? (
-                links.map(link => (
-                  <div key={link.id} className="table-row">
-                    <div>{link.name}</div>
-                    <div>{link.url}</div>
-                    <div className="actions">
-                      <button className="icon-button" onClick={() => handleEditLink(link)}><FiEdit2 /></button>
-                      <button className="icon-button" onClick={() => handleDeleteLink(link.id)}><FiTrash2 /></button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <p>You do not have any trigger link yet. <button onClick={() => setShowAddLinkModal(true)}>Click here to create your first trigger link</button></p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="trigger-links-analyze">
-            <div className="empty-state">
-              <p>No analytics data available yet.</p>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderSnippets = () => {
-    return (
-      <div className="snippets">
-        <div className="snippets-wrapper">
-          <div className="snippets-sidebar">
-            <div className="search-input">
-              <FiSearch className="search-icon" />
-              <input type="text" placeholder="Search snippets..." />
-            </div>
-            <div className="folder-list">
-              {mockFolders.map(folder => (
-                <div
-                  key={folder.id}
-                  className={`folder-item ${activeFolder === folder.id ? 'active' : ''}`}
-                  onClick={() => setActiveFolder(folder.id)}
-                >
-                  <FiFolder />
-                  <span>{folder.name}</span>
-                  <span className="text-secondary">({folder.count})</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="snippets-main">
-            <div className="snippets-header">
-              <h2>Snippets</h2>
-              <p>Create snippets to quickly insert predefined content into messages for faster, consistent communication.</p>
-              <div className="snippets-actions">
-                <button 
-                  className="secondary-button"
-                  onClick={() => setShowFolderModal(true)}
-                >
-                  <FiFolder /> Add Folder
-                </button>
-                <div className="dropdown-container">
-                  <button 
-                    className="primary-button"
-                    onClick={() => setShowSnippetDropdown(!showSnippetDropdown)}
-                  >
-                    Add Snippet
-                  </button>
-                  {showSnippetDropdown && (
-                    <div className="dropdown-menu">
-                      <button onClick={() => {
-                        setShowTextSnippetModal(true);
-                        setShowSnippetDropdown(false);
-                      }}>Add Text Snippet</button>
-                      <button onClick={() => {
-                        setShowEmailSnippetModal(true);
-                        setShowSnippetDropdown(false);
-                      }}>Add Email Snippet</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="snippets-content">
-              {filteredSnippets.length > 0 ? (
-                filteredSnippets.map(snippet => (
-                  <div key={snippet.id} className="snippet-card">
-                    <div className="snippet-header">
-                      <h3>{snippet.name}</h3>
-                      <div className="snippet-actions">
-                        <button className="icon-button" onClick={() => handleEditSnippet(snippet)}><FiEdit2 /></button>
-                        <button className="icon-button" onClick={() => handleDeleteSnippet(snippet.id)}><FiTrash2 /></button>
-                        <button className="icon-button"><FiMoreVertical /></button>
-                      </div>
-                    </div>
-                    <p>{snippet.content.substring(0, 100)}...</p>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-icon">📄</div>
-                  <p>No snippets found</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {showTextSnippetModal && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <div className="modal-header">
-                <h3>{editSnippet ? 'Edit Text Snippet' : 'Create Text Snippet'}</h3>
-                <button className="close-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>
-                  <FiX />
-                </button>
-              </div>
-              <div className="modal-content">
-                <div className="form-group">
-                  <label>Name <span className="required">*</span></label>
-                  <input id="textSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
-                </div>
-                <div className="form-group">
-                  <label>Snippets Body <span className="required">*</span></label>
-                  <div className="text-editor">
-                    <div className="editor-toolbar">
-                      <button><FiSmile /></button>
-                      <button><FiPaperclip /></button>
-                      <button><FiZap /></button>
-                    </div>
-                    <textarea id="textSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
-                    <div className="editor-footer">
-                      <span>Approximate Cost: $0</span>
-                      <span>0 characters | 0 words | 0 segs</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Folder</label>
-                  <select id="textSnippetFolder" defaultValue={editSnippet?.folder || ''}>
-                    {mockFolders.map(folder => (
-                      <option key={folder.id} value={folder.id}>{folder.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="secondary-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
-                <button className="primary-button" onClick={handleSaveTextSnippet}>Save</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showEmailSnippetModal && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <div className="modal-header">
-                <h3>{editSnippet ? 'Edit Email Snippet' : 'Create Email Snippet'}</h3>
-                <button className="close-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>
-                  <FiX />
-                </button>
-              </div>
-              <div className="modal-content">
-                <div className="form-group">
-                  <label>Name <span className="required">*</span></label>
-                  <input id="emailSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
-                </div>
-                <div className="form-group">
-                  <label>Subject <span className="required">*</span></label>
-                  <input id="emailSnippetSubject" type="text" placeholder="Enter Subject" defaultValue={editSnippet?.subject || ''} />
-                </div>
-                <div className="form-group">
-                  <label>Snippets Body <span className="required">*</span></label>
-                  <div className="rich-text-editor">
-                    <div className="editor-toolbar">
-                      <select><option>Paragraph</option></select>
-                      <select><option>14px</option></select>
-                      <select><option>1.5</option></select>
-                      <select><option>Verdana</option></select>
-                    </div>
-                    <textarea id="emailSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
-                    <div className="editor-footer">
-                      <span>0 characters | 0 words</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Folder</label>
-                  <select id="emailSnippetFolder" defaultValue={editSnippet?.folder || ''}>
-                    {mockFolders.map(folder => (
-                      <option key={folder.id} value={folder.id}>{folder.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="secondary-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
-                <button className="primary-button" onClick={handleSaveEmailSnippet}>Save</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showFolderModal && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <div className="modal-header">
-                <h3>Create New Folder</h3>
-                <button className="close-button" onClick={() => setShowFolderModal(false)}>
-                  <FiX />
-                </button>
-              </div>
-              <div className="modal-content">
-                <div className="form-group">
-                  <label>Folder Name <span className="required">*</span></label>
-                  <input id="folderName" type="text" placeholder="Enter folder name" />
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button class="secondary-button" onClick={() => setShowFolderModal(false)}>Cancel</button>
-                <button class="primary-button" onClick={handleCreateFolder}>Create Folder</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderManualActions = () => {
-    return (
-      <div className="manual-actions">
-        <div className="actions-header">
-          <h2>Manual Actions</h2>
-          <div className="actions-controls">
-            <input type="text" placeholder="Type to Search Workflows" />
-            <select>
-              <option>Select Assignee</option>
-              <option>John Doe</option>
-              <option>Sarah Smith</option>
-            </select>
-            <button className="primary-button">Let's start</button>
-          </div>
-        </div>
-        
-        {mockActions.length > 0 ? (
-          <div className="actions-list">
-            {mockActions.map(action => (
-              <div key={action.id} className="action-card">
-                <h3>{action.title}</h3>
-                <p>{action.description}</p>
-                <div className="action-meta">
-                  <span>Assignee: {action.assignee}</span>
-                  <span>Priority: {action.priority}</span>
-                  <span>Due: {action.dueDate}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="success-state">
-            <div className="success-icon">✓</div>
-            <h3>Good Work!</h3>
-            <p>You have no pending tasks</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
+  // Render the component
   return (
     <div className="app">
-      <Sidebar /> {/* Add Sidebar component */}
+      <Sidebar />
       <div className="main-content">
         <nav className="nav">
           <div className="tabs">
-            {tabs.map(tab => (
+            {[
+              { id: 'conversations', label: 'Conversations' },
+              { id: 'manualActions', label: 'Manual Actions' },
+              { id: 'snippets', label: 'Snippets' },
+              { id: 'triggerLinks', label: 'Trigger Links' },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 className={`tab ${activeTab === tab.id ? 'active' : ''}`}
@@ -627,7 +400,11 @@ const Conversation = () => {
             <div className="conversations-layout">
               <div className="conversations-sidebar">
                 <div className="sub-tabs">
-                  {subTabs.map(tab => (
+                  {[
+                    { id: 'unread', label: 'Unread', icon: <FiMessageSquare /> },
+                    { id: 'starred', label: 'Starred', icon: <FiStar /> },
+                    { id: 'recent', label: 'Recent', icon: <FiClock /> },
+                  ].map((tab) => (
                     <button
                       key={tab.id}
                       className={`sub-tab ${activeSubTab === tab.id ? 'active' : ''}`}
@@ -642,15 +419,15 @@ const Conversation = () => {
                 <div className="search-bar">
                   <div className="search-input">
                     <FiSearch className="search-icon" />
-                    <input 
-                      type="text" 
-                      placeholder="Search conversations..." 
+                    <input
+                      type="text"
+                      placeholder="Search conversations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
                   <div className="search-actions">
-                    <button className="icon-button" onClick={handleFilterClick}>
+                    <button className="icon-button" onClick={() => setShowFilterModal(true)}>
                       <FiFilter />
                     </button>
                     <button className="icon-button" onClick={() => setShowAddConversationModal(true)}>
@@ -661,11 +438,11 @@ const Conversation = () => {
 
                 <div className="conversations-list">
                   {filteredConversations.length > 0 ? (
-                    filteredConversations.map(conv => (
+                    filteredConversations.map((conv) => (
                       <div
                         key={conv.id}
-                        className={`conversation-item ${selectedConversation === conv.id ? 'selected' : ''} ${conv.unread ? 'unread' : ''}`}
-                        onClick={() => setSelectedConversation(conv.id)}
+                        className={`conversation-item ${selectedConversation?.id === conv.id ? 'selected' : ''} ${conv.unread ? 'unread' : ''}`}
+                        onClick={() => handleConversationClick(conv)}
                       >
                         <div className="conversation-avatar">{conv.avatar}</div>
                         <div className="conversation-info">
@@ -692,13 +469,13 @@ const Conversation = () => {
                     <div className="conversation-header">
                       <div className="contact-info">
                         <div className="avatar">
-                          {conversations.find(c => c.id === selectedConversation)?.avatar}
+                          {selectedConversation.avatar}
                         </div>
-                        <h3>{conversations.find(c => c.id === selectedConversation)?.name}</h3>
+                        <h3>{selectedConversation.name}</h3>
                       </div>
                     </div>
                     <div className="messages-container">
-                      {messages[selectedConversation].map(message => (
+                      {messages[selectedConversation.id]?.map((message) => (
                         <div key={message.id} className={`message ${message.type}`}>
                           <div className="message-content">
                             <p>{message.content}</p>
@@ -728,16 +505,16 @@ const Conversation = () => {
                   <div className="contact-info-panel">
                     <div className="contact-header">
                       <div className="large-avatar">
-                        {conversations.find(c => c.id === selectedConversation)?.avatar}
+                        {selectedConversation.avatar}
                       </div>
-                      <h3>{conversations.find(c => c.id === selectedConversation)?.name}</h3>
+                      <h3>{selectedConversation.name}</h3>
                     </div>
                     <div className="contact-details-content">
                       <div className="detail-section">
                         <h4>Contact Information</h4>
                         <p><FiUser /> Customer since 2023</p>
-                        <p><FiPhone /> {conversations.find(c => c.id === selectedConversation)?.contact || 'N/A'}</p>
-                        <p><FiMail /> {conversations.find(c => c.id === selectedConversation)?.email || 'N/A'}</p>
+                        <p><FiPhone /> {selectedConversation.contact || 'N/A'}</p>
+                        <p><FiMail /> {selectedConversation.email || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -752,9 +529,246 @@ const Conversation = () => {
             </div>
           )}
 
-          {activeTab === 'manualActions' && renderManualActions()}
-          {activeTab === 'snippets' && renderSnippets()}
-          {activeTab === 'triggerLinks' && renderTriggerLinks()}
+          {activeTab === 'manualActions' && (
+            <div className="manual-actions">
+              <div className="actions-header">
+                <h2>Manual Actions</h2>
+                <div className="actions-controls">
+                  <input type="text" placeholder="Type to Search Workflows" />
+                  <select>
+                    <option>Select Assignee</option>
+                    <option>John Doe</option>
+                    <option>Sarah Smith</option>
+                  </select>
+                  <button className="primary-button">Let's start</button>
+                </div>
+              </div>
+
+              {mockActions.length > 0 ? (
+                <div className="actions-list">
+                  {mockActions.map((action) => (
+                    <div key={action.id} className="action-card">
+                      <h3>{action.title}</h3>
+                      <p>{action.description}</p>
+                      <div className="action-meta">
+                        <span>Assignee: {action.assignee}</span>
+                        <span>Priority: {action.priority}</span>
+                        <span>Due: {action.dueDate}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="success-state">
+                  <div className="success-icon">✓</div>
+                  <h3>Good Work!</h3>
+                  <p>You have no pending tasks</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'snippets' && (
+            <div className="snippets">
+              <div className="snippets-wrapper">
+                <div className="snippets-sidebar">
+                  <div className="search-input">
+                    <FiSearch className="search-icon" />
+                    <input type="text" placeholder="Search snippets..." />
+                  </div>
+                  <div className="folder-list">
+                    {mockFolders.map((folder) => (
+                      <div
+                        key={folder.id}
+                        className={`folder-item ${activeFolder === folder.id ? 'active' : ''}`}
+                        onClick={() => setActiveFolder(folder.id)}
+                      >
+                        <FiFolder />
+                        <span>{folder.name}</span>
+                        <span className="text-secondary">({folder.count})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="snippets-main">
+                  <div className="snippets-header">
+                    <h2>Snippets</h2>
+                    <p>Create snippets to quickly insert predefined content into messages for faster, consistent communication.</p>
+                    <div className="snippets-actions">
+                      <button
+                        className="secondary-button"
+                        onClick={() => setShowFolderModal(true)}
+                      >
+                        <FiFolder /> Add Folder
+                      </button>
+                      <div className="dropdown-container">
+                        <button
+                          className="primary-button"
+                          onClick={() => setShowSnippetDropdown(!showSnippetDropdown)}
+                        >
+                          Add Snippet
+                        </button>
+                        {showSnippetDropdown && (
+                          <div className="dropdown-menu">
+                            <button onClick={() => {
+                              setShowTextSnippetModal(true);
+                              setShowSnippetDropdown(false);
+                            }}>Add Text Snippet</button>
+                            <button onClick={() => {
+                              setShowEmailSnippetModal(true);
+                              setShowSnippetDropdown(false);
+                            }}>Add Email Snippet</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="snippets-content">
+                    {filteredSnippets.length > 0 ? (
+                      filteredSnippets.map((snippet) => (
+                        <div key={snippet.id} className="snippet-card">
+                          <div className="snippet-header">
+                            <h3>{snippet.name}</h3>
+                            <div className="snippet-actions">
+                              <button className="icon-button" onClick={() => handleEditSnippet(snippet)}><FiEdit2 /></button>
+                              <button className="icon-button" onClick={() => handleDeleteSnippet(snippet.id)}><FiTrash2 /></button>
+                              <button className="icon-button"><FiMoreVertical /></button>
+                            </div>
+                          </div>
+                          <p>{snippet.content.substring(0, 100)}...</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="empty-state">
+                        <div className="empty-icon">📄</div>
+                        <p>No snippets found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {showTextSnippetModal && (
+                <div className="modal-overlay">
+                  <div className="modal">
+                    <div className="modal-header">
+                      <h3>{editSnippet ? 'Edit Text Snippet' : 'Create Text Snippet'}</h3>
+                      <button className="close-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>
+                        <FiX />
+                      </button>
+                    </div>
+                    <div className="modal-content">
+                      <div className="form-group">
+                        <label>Name <span className="required">*</span></label>
+                        <input id="textSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
+                      </div>
+                      <div className="form-group">
+                        <label>Snippets Body <span className="required">*</span></label>
+                        <div className="text-editor">
+                          <div className="editor-toolbar">
+                            <button><FiSmile /></button>
+                            <button><FiPaperclip /></button>
+                            <button><FiZap /></button>
+                          </div>
+                          <textarea id="textSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
+                          <div className="editor-footer">
+                            <span>Approximate Cost: $0</span>
+                            <span>0 characters | 0 words | 0 segs</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Folder</label>
+                        <select id="textSnippetFolder" defaultValue={editSnippet?.folder || ''}>
+                          {mockFolders.map((folder) => (
+                            <option key={folder.id} value={folder.id}>{folder.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="modal-footer">
+                      <button className="secondary-button" onClick={() => { setShowTextSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
+                      <button className="primary-button" onClick={handleSaveTextSnippet}>Save</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showEmailSnippetModal && (
+                <div className="modal-overlay">
+                  <div className="modal">
+                    <div className="modal-header">
+                      <h3>{editSnippet ? 'Edit Email Snippet' : 'Create Email Snippet'}</h3>
+                      <button className="close-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>
+                        <FiX />
+                      </button>
+                    </div>
+                    <div className="modal-content">
+                      <div className="form-group">
+                        <label>Name <span className="required">*</span></label>
+                        <input id="emailSnippetName" type="text" placeholder="Enter Snippet Name" defaultValue={editSnippet?.name || ''} />
+                      </div>
+                      <div className="form-group">
+                        <label>Subject <span className="required">*</span></label>
+                        <input id="emailSnippetSubject" type="text" placeholder="Enter Subject" defaultValue={editSnippet?.subject || ''} />
+                      </div>
+                      <div className="form-group">
+                        <label>Snippets Body <span className="required">*</span></label>
+                        <div className="rich-text-editor">
+                          <div className="editor-toolbar">
+                            <select><option>Paragraph</option></select>
+                            <select><option>14px</option></select>
+                            <select><option>1.5</option></select>
+                            <select><option>Verdana</option></select>
+                          </div>
+                          <textarea id="emailSnippetContent" placeholder="Type a message" defaultValue={editSnippet?.content || ''}></textarea>
+                          <div className="editor-footer">
+                            <span>0 characters | 0 words</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Folder</label>
+                        <select id="emailSnippetFolder" defaultValue={editSnippet?.folder || ''}>
+                          {mockFolders.map((folder) => (
+                            <option key={folder.id} value={folder.id}>{folder.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="modal-footer">
+                      <button className="secondary-button" onClick={() => { setShowEmailSnippetModal(false); setEditSnippet(null); }}>Cancel</button>
+                      <button className="primary-button" onClick={handleSaveEmailSnippet}>Save</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showFolderModal && (
+                <div className="modal-overlay">
+                  <div className="modal">
+                    <div className="modal-header">
+                      <h3>Create New Folder</h3>
+                      <button className="close-button" onClick={() => setShowFolderModal(false)}>
+                        <FiX />
+                      </button>
+                    </div>
+                    <div className="modal-content">
+                      <div className="form-group">
+                        <label>Folder Name <span className="required">*</span></label>
+                        <input id="folderName" type="text" placeholder="Enter folder name" />
+                      </div>
+                    </div>
+                    <div className="modal-footer">
+                      <button className="secondary-button" onClick={() => setShowFolderModal(false)}>Cancel</button>
+                      <button className="primary-button" onClick={handleCreateFolder}>Create Folder</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -880,10 +894,8 @@ const Conversation = () => {
                   />
                 </div>
                 <div className="modal-footer">
-                  <>
-                    <button className="secondary-button" onClick={() => { setShowAddLinkModal(false); setEditLink(null); }}>Cancel</button>
-                    <button className="primary-button" type="submit">{editLink ? 'Save Changes' : 'Add Link'}</button>
-                  </>
+                  <button className="secondary-button" onClick={() => { setShowAddLinkModal(false); setEditLink(null); }}>Cancel</button>
+                  <button className="primary-button" type="submit">{editLink ? 'Save Changes' : 'Add Link'}</button>
                 </div>
               </form>
             </div>

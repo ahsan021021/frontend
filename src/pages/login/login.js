@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "./login.css"; // Ensure this file exists in the same directory
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -13,13 +15,13 @@ const Login = () => {
         email,
         password,
       });
-      console.log(response.data);
+      const { token } = response.data;
+      localStorage.setItem("token", token);
       setMessage("Login successful!");
-      // Handle successful login here
+      navigate("/conversations"); // Redirect to the conversations page
     } catch (error) {
       console.error("There was an error logging in!", error);
       setMessage("Invalid email or password");
-      // Handle login error here
     }
   };
 

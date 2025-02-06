@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Menu, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Menu } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Contacts from './pages/Contacts';
 import SmartLists from './pages/SmartLists';
@@ -15,6 +16,9 @@ function Contact() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupContent, setPopupContent] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   const menuItems = [
     { id: 'contacts', label: 'Contacts' },
@@ -26,10 +30,43 @@ function Contact() {
     { id: 'manageSmartLists', label: 'Manage Smart Lists' },
   ];
 
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const response = await axios.get('/api/contacts');
+        setContacts(response.data);
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+      }
+    };
+
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get('/api/companies');
+        setCompanies(response.data);
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+      }
+    };
+
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get('/api/tasks');
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    };
+
+    fetchContacts();
+    fetchCompanies();
+    fetchTasks();
+  }, []);
+
   const renderPage = () => {
     switch(currentPage) {
       case 'contacts':
-        return <Contacts onButtonClick={handleButtonClick} />;
+        return <Contacts contacts={contacts} onButtonClick={handleButtonClick} />;
       case 'smartLists':
         return <SmartLists />;
       case 'bulkActions':
@@ -37,13 +74,13 @@ function Contact() {
       case 'restore':
         return <Restore />;
       case 'tasks':
-        return <Tasks />;
+        return <Tasks tasks={tasks} />;
       case 'companies':
-        return <Companies />;
+        return <Companies companies={companies} />;
       case 'manageSmartLists':
         return <ManageSmartLists />;
       default:
-        return <Contacts />;
+        return <Contacts contacts={contacts} />;
     }
   };
 

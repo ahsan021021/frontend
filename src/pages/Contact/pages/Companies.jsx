@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Companies = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -17,6 +18,19 @@ const Companies = () => {
     country: '',
   });
 
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/companies');
+        setCompanies(response.data);
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
   const handleButtonClick = (content) => {
     setPopupContent(content);
     setIsPopupOpen(true);
@@ -32,22 +46,27 @@ const Companies = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setCompanies([...companies, formData]);
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      website: '',
-      address: '',
-      state: '',
-      city: '',
-      description: '',
-      postalCode: '',
-      country: '',
-    });
-    closePopup();
+    try {
+      const response = await axios.post('http://localhost:5000/api/companies', formData);
+      setCompanies([...companies, response.data]);
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        website: '',
+        address: '',
+        state: '',
+        city: '',
+        description: '',
+        postalCode: '',
+        country: '',
+      });
+      closePopup();
+    } catch (error) {
+      console.error('Error adding company:', error);
+    }
   };
 
   return (
@@ -96,8 +115,8 @@ const Companies = () => {
             <span>{company.description}</span>
             <span>{company.postalCode}</span>
             <span>{company.country}</span>
-            <span>{new Date().toLocaleString()}</span>
-            <span>{new Date().toLocaleString()}</span>
+            <span>{new Date(company.createdAt).toLocaleString()}</span>
+            <span>{new Date(company.updatedAt).toLocaleString()}</span>
             <span>Admin</span>
           </div>
         ))}

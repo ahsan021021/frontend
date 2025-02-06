@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/SideBar';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, addDays, isToday, setMonth, setYear } from 'date-fns';
+import Sidebar from '../../components/Sidebar';
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  startOfWeek,
+  endOfWeek,
+  isToday,
+  setMonth,
+  setYear,
+} from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaClock, FaVideo, FaEnvelope, FaTimes, FaUndo } from 'react-icons/fa';
 import { Toaster, toast } from 'react-hot-toast';
+import axios from 'axios';
 import './Calendar.css';
 
 function Calendar() {
@@ -19,157 +33,145 @@ function Calendar() {
   const [showCancelReason, setShowCancelReason] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [pendingMeetings, setPendingMeetings] = useState([]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
+  const [meetings, setMeetings] = useState([]);
+  const [filteredMeetings, setFilteredMeetings] = useState([]);
   const [newEvent, setNewEvent] = useState({
     title: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     startTime: '09:00',
     duration: 30,
-    email: ''
+    email: '',
   });
 
-  // Mock meetings data
-  const initialMeetings = [
-    {
-      id: 1,
-      title: "Team Meeting",
-      date: format(new Date(), 'yyyy-MM-dd'), // Today
-      startTime: "10:00",
-      duration: 60,
-      email: "team@example.com"
+  // Axios configuration
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:5000/api/meeting',
+    headers: {
+      'Content-Type': 'application/json',
     },
-    {
-      id: 2,
-      title: "Client Review",
-      date: format(addDays(new Date(), 1), 'yyyy-MM-dd'), // Tomorrow
-      startTime: "14:00",
-      duration: 45,
-      email: "client@example.com"
-    }
-  ];
-  
-  const [meetings, setMeetings] = useState(initialMeetings);
-
-  // Sort meetings by date and time
-  const sortedMeetings = [...meetings].sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.startTime}`);
-    const dateB = new Date(`${b.date}T${b.startTime}`);
-    return dateA - dateB;
   });
 
-  // Filter meetings based on active tab
-  const filteredMeetings = sortedMeetings.filter(meeting => {
-    const meetingDate = new Date(`${meeting.date}T${meeting.startTime}`);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
+  // Fetch meetings from the backend
+  const fetchMeetings = async () => {
+    try {
+      const response = await axiosInstance.get('/');
+      setMeetings(response.data);
+    } catch (error) {
+      console.error('Error fetching meetings:', error);
+      toast.error('Failed to fetch meetings');
+    }
+  };
+
+  // Fetch meetings on component mount
+  useEffect(() => {
+    fetchMeetings();
+  }, []);
+
+  // Filter meetings based on the active tab
+  useEffect(() => {
+    let filtered = [];
     switch (activeTab) {
       case 'today':
-        return isSameDay(meetingDate, today);
+        filtered = meetings.filter((meeting) => isSameDay(new Date(meeting.date), new Date()));
+        break;
       case 'upcoming':
-        return meetingDate >= today;
+        filtered = meetings.filter((meeting) => new Date(meeting.date) > new Date());
+        break;
       case 'pending':
-        // Meetings that are today but haven't started yet
-        const now = new Date();
-        return isSameDay(meetingDate, today) && meetingDate > now;
+        filtered = pendingMeetings;
+        break;
       case 'all':
-        return true;
-      case 'restore':
-        return false; // No meetings to show in the main timeline for restore tab
+        filtered = meetings;
+        break;
       default:
-        return true;
+        filtered = meetings;
     }
-  });
+    setFilteredMeetings(filtered);
+  }, [activeTab, meetings, pendingMeetings]);
 
-  const handlePrevMonth = () => {
-    setSelectedDate(subMonths(selectedDate, 1));
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleNextMonth = () => {
-    setSelectedDate(addMonths(selectedDate, 1));
-  };
-
-  const handlePrevYear = () => {
-    setSelectedDate(subMonths(selectedDate, 12));
-  };
-
-  const handleNextYear = () => {
-    setSelectedDate(addMonths(selectedDate, 12));
-  };
-
-  const handleSelectYear = (year) => {
-    setSelectedDate(setYear(selectedDate, year));
-    setShowYearDropdown(false);
-  };
-
-  const handleSelectMonth = (month) => {
-    setSelectedDate(setMonth(selectedDate, month));
-    setShowMonthDropdown(false);
-  };
-
+  // Get days in the current month
   const getDaysInMonth = () => {
     const start = startOfWeek(startOfMonth(selectedDate));
     const end = endOfWeek(endOfMonth(selectedDate));
     return eachDayOfInterval({ start, end });
   };
 
-  const handleAddEvent = (e) => {
+  // Handle adding a new meeting
+  const handleAddEvent = async (e) => {
     e.preventDefault();
-    
+
     // Validate date is not in the past
     const eventDate = new Date(`${newEvent.date}T${newEvent.startTime}`);
     if (eventDate < new Date()) {
-      toast.error("Cannot schedule meetings in the past");
+      toast.error('Cannot schedule meetings in the past');
       return;
     }
 
-    const event = {
-      id: meetings.length + 1,
-      ...newEvent
-    };
-    
-    setMeetings([...meetings, event]);
-    setShowAddEvent(false);
-    setNewEvent({
-      title: '',
-      date: format(selectedDate, 'yyyy-MM-dd'), // Use selected date as default
-      startTime: '09:00',
-      duration: 30,
-      email: ''
-    });
-    toast.success('Event added successfully!');
+    try {
+      const response = await axiosInstance.post('/', newEvent);
+      setMeetings([...meetings, response.data]);
+      setShowAddEvent(false);
+      setNewEvent({
+        title: '',
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        startTime: '09:00',
+        duration: 30,
+        email: '',
+      });
+      toast.success('Event added successfully!');
+    } catch (error) {
+      console.error('Error adding meeting:', error);
+      toast.error('Failed to add meeting');
+    }
   };
 
-  const handleDeleteMeeting = (id) => {
-    const meetingToDelete = meetings.find(meeting => meeting.id === id);
-    setPendingMeetings([...pendingMeetings, meetingToDelete]);
-    setMeetings(meetings.filter(meeting => meeting.id !== id));
-    setShowMeetingDetails(null);
-    toast.success('Meeting cancelled successfully');
+  // Handle deleting a meeting
+  const handleDeleteMeeting = async (id) => {
+    try {
+      await axiosInstance.delete(`/${id}`);
+      const meetingToDelete = meetings.find((meeting) => meeting.id === id);
+      setPendingMeetings([...pendingMeetings, meetingToDelete]);
+      setMeetings(meetings.filter((meeting) => meeting.id !== id));
+      setShowMeetingDetails(null);
+      toast.success('Meeting cancelled successfully');
+    } catch (error) {
+      console.error('Error deleting meeting:', error);
+      toast.error('Failed to cancel meeting');
+    }
   };
 
-  const handleCancelMeeting = (e) => {
+  // Handle restoring a meeting
+  const handleRestoreMeeting = async (id) => {
+    try {
+      const meetingToRestore = pendingMeetings.find((meeting) => meeting.id === id);
+      const response = await axiosInstance.post('/', meetingToRestore);
+      setMeetings([...meetings, response.data]);
+      setPendingMeetings(pendingMeetings.filter((meeting) => meeting.id !== id));
+      toast.success('Meeting restored successfully');
+    } catch (error) {
+      console.error('Error restoring meeting:', error);
+      toast.error('Failed to restore meeting');
+    }
+  };
+
+  // Handle canceling a meeting with a reason
+  const handleCancelMeeting = async (e) => {
     e.preventDefault();
     if (cancelReason.trim() === '') {
-      toast.error("Please provide a reason for cancellation");
+      toast.error('Please provide a reason for cancellation');
       return;
     }
-    handleDeleteMeeting(showMeetingDetails.id);
+    await handleDeleteMeeting(showMeetingDetails.id);
     setShowCancelReason(false);
     setCancelReason('');
   };
 
-  const handleRestoreMeeting = (id) => {
-    const meetingToRestore = pendingMeetings.find(meeting => meeting.id === id);
-    setMeetings([...meetings, meetingToRestore]);
-    setPendingMeetings(pendingMeetings.filter(meeting => meeting.id !== id));
-    toast.success('Meeting restored successfully');
-  };
-
+  // Check if the device is mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -179,8 +181,9 @@ function Calendar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Tab button component
   const TabButton = ({ tab, label }) => (
-    <button 
+    <button
       onClick={() => setActiveTab(tab)}
       className={`tab-button ${activeTab === tab ? 'active' : ''}`}
     >
@@ -189,10 +192,10 @@ function Calendar() {
   );
 
   return (
-    <div className={`container ${isSidebarOpen ? "sidebar-open" : ""}`}>
+    <div className={`container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="main-content">
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 3000,
@@ -209,7 +212,7 @@ function Calendar() {
             <TabButton tab="upcoming" label="Upcoming" />
             <TabButton tab="pending" label="Pending" />
             <TabButton tab="all" label="All" />
-            <TabButton tab="restore" label="Restore" /> {/* New Restore tab */}
+            <TabButton tab="restore" label="Restore" />
           </div>
           {isMobile && (
             <button
@@ -296,7 +299,7 @@ function Calendar() {
             <div className="calendar">
               <div className="calendar-header">
                 <div className="view-buttons">
-                  <button 
+                  <button
                     onClick={() => setViewMode('month')}
                     className={`view-button ${viewMode === 'month' ? 'active' : ''}`}
                   >
@@ -304,13 +307,13 @@ function Calendar() {
                   </button>
                 </div>
                 <div className="calendar-nav">
-                  <button onClick={handlePrevYear}>
+                  <button onClick={() => setSelectedDate(subMonths(selectedDate, 12))}>
                     <FaChevronLeft className="w-5 h-5" />
                   </button>
                   <span onClick={() => setShowYearDropdown(!showYearDropdown)} className="cursor-pointer">
                     {format(selectedDate, 'yyyy')}
                   </span>
-                  <button onClick={handleNextYear}>
+                  <button onClick={() => setSelectedDate(addMonths(selectedDate, 12))}>
                     <FaChevronRight className="w-5 h-5" />
                   </button>
                   {showYearDropdown && (
@@ -318,7 +321,7 @@ function Calendar() {
                       {[...Array(10)].map((_, i) => {
                         const year = new Date().getFullYear() - 5 + i;
                         return (
-                          <div key={year} onClick={() => handleSelectYear(year)} className="dropdown-item">
+                          <div key={year} onClick={() => setSelectedDate(setYear(selectedDate, year))} className="dropdown-item">
                             {year}
                           </div>
                         );
@@ -327,44 +330,44 @@ function Calendar() {
                   )}
                 </div>
               </div>
-              
+
               <div className="calendar-header">
-                <button onClick={handlePrevMonth}>
+                <button onClick={() => setSelectedDate(subMonths(selectedDate, 1))}>
                   <FaChevronLeft className="w-5 h-5" />
                 </button>
                 <span onClick={() => setShowMonthDropdown(!showMonthDropdown)} className="cursor-pointer">
                   {format(selectedDate, 'MMMM yyyy')}
                 </span>
-                <button onClick={handleNextMonth}>
+                <button onClick={() => setSelectedDate(addMonths(selectedDate, 1))}>
                   <FaChevronRight className="w-5 h-5" />
                 </button>
                 {showMonthDropdown && (
                   <div className="dropdown">
                     {Array.from({ length: 12 }, (_, i) => (
-                      <div key={i} onClick={() => handleSelectMonth(i)} className="dropdown-item">
+                      <div key={i} onClick={() => setSelectedDate(setMonth(new Date(), i))} className="dropdown-item">
                         {format(setMonth(new Date(), i), 'MMMM')}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              
+
               <div className="calendar-grid">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                   <div key={day} className="calendar-day-header">{day}</div>
                 ))}
               </div>
-              
+
               <div className="calendar-grid">
                 {getDaysInMonth().map((day, i) => {
                   const isCurrentMonth = format(day, 'M') === format(selectedDate, 'M');
-                  const hasEvent = meetings.some(m => m.date === format(day, 'yyyy-MM-dd'));
+                  const hasEvent = meetings.some((m) => m.date === format(day, 'yyyy-MM-dd'));
                   const dayClasses = [
                     'calendar-day',
                     !isCurrentMonth && 'other-month',
                     isSameDay(day, selectedDate) && 'selected',
                     hasEvent && 'has-event',
-                    isToday(day) && !isSameDay(day, selectedDate) && 'today' // Ensure only one date is selected
+                    isToday(day) && !isSameDay(day, selectedDate) && 'today',
                   ].filter(Boolean).join(' ');
 
                   return (
@@ -384,7 +387,7 @@ function Calendar() {
                   setShowAddEvent(true);
                   setNewEvent({
                     ...newEvent,
-                    date: format(selectedDate, 'yyyy-MM-dd') // Set selected date when opening the form
+                    date: format(selectedDate, 'yyyy-MM-dd'),
                   });
                 }}
                 className="add-event-btn"
@@ -489,7 +492,7 @@ function Calendar() {
                     type="text"
                     required
                     value={newEvent.title}
-                    onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                    onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                     className="form-input"
                     placeholder="Enter meeting title"
                   />
@@ -501,7 +504,7 @@ function Calendar() {
                     required
                     value={newEvent.date}
                     min={format(new Date(), 'yyyy-MM-dd')}
-                    onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                    onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
                     className="form-input"
                   />
                 </div>
@@ -511,7 +514,7 @@ function Calendar() {
                     type="time"
                     required
                     value={newEvent.startTime}
-                    onChange={(e) => setNewEvent({...newEvent, startTime: e.target.value})}
+                    onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
                     className="form-input"
                   />
                 </div>
@@ -523,7 +526,7 @@ function Calendar() {
                     min="15"
                     step="15"
                     value={newEvent.duration}
-                    onChange={(e) => setNewEvent({...newEvent, duration: parseInt(e.target.value)})}
+                    onChange={(e) => setNewEvent({ ...newEvent, duration: parseInt(e.target.value) })}
                     className="form-input"
                   />
                 </div>
@@ -533,7 +536,7 @@ function Calendar() {
                     type="email"
                     required
                     value={newEvent.email}
-                    onChange={(e) => setNewEvent({...newEvent, email: e.target.value})}
+                    onChange={(e) => setNewEvent({ ...newEvent, email: e.target.value })}
                     className="form-input"
                     placeholder="Enter participant's email"
                   />

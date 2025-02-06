@@ -1,32 +1,40 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
 function BulkActions() {
+  const [importHistory, setImportHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchImportHistory = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/import/history');
+        setImportHistory(response.data);
+      } catch (error) {
+        console.error('Error fetching import history:', error);
+      }
+    };
+
+    fetchImportHistory();
+  }, []);
+
   return (
     <div className="page-content">
       <div className="bulk-actions-header">
-        <div className="filters">
-          <select className="filter-select">
-            <option>All Actions</option>
-          </select>
-          <select className="filter-select">
-            <option>All Users</option>
-          </select>
-          <select className="filter-select">
-            <option>Any Status</option>
-          </select>
-          <input type="date" className="date-range" />
-        </div>
+        <h2>Import History</h2>
       </div>
       <div className="bulk-actions-table">
         <div className="table-header">
-          <span>Name</span>
-          <span>Bulk Operation (Type)</span>
-          <span>Status</span>
-          <span>Created</span>
-          <span>User</span>
-          <span>Completed</span>
-          <span>Statistics</span>
-          <span>Actions</span>
+          <span>Type</span>
+          <span>Timestamp</span>
+          <span>Count</span>
         </div>
-        {/* Table content */}
+        {importHistory.map((entry) => (
+          <div key={entry._id} className="table-row">
+            <span>{entry.type}</span>
+            <span>{new Date(entry.timestamp).toLocaleString()}</span>
+            <span>{entry.count}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
