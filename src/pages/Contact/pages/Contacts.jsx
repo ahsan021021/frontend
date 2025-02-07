@@ -20,7 +20,7 @@ function Contacts() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/contacts');
+        const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/contacts');
         setContacts(response.data);
       } catch (error) {
         console.error('Error fetching contacts:', error);
@@ -59,7 +59,7 @@ function Contacts() {
   const handleAddContact = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/contacts', newContact);
+      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/contacts', newContact);
       setContacts([...contacts, response.data]);
       setNewContact({
         name: '',
@@ -76,7 +76,7 @@ function Contacts() {
 
   const handleDeleteContact = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/contacts/${id}`);
+      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/contacts/${id}`);
       setContacts(contacts.filter(contact => contact._id !== id));
       setSelectedContacts(selectedContacts.filter(selectedId => selectedId !== id));
       closePopup();
@@ -91,7 +91,7 @@ function Contacts() {
       return;
     }
     try {
-      await Promise.all(selectedContacts.map(id => axios.delete(`http://localhost:5000/api/contacts/${id}`)));
+      await Promise.all(selectedContacts.map(id => axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/contacts/${id}`)));
       setContacts(contacts.filter(contact => !selectedContacts.includes(contact._id)));
       setSelectedContacts([]);
     } catch (error) {

@@ -34,7 +34,7 @@ function BusinessProfile() {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/business-profile', // URL for the POST request
+        'https://lead-savvy-backend-in-progress.onrender.com/api/business-profile', // URL for the POST request
         profileData, // Data to send
         {
           headers: {

@@ -38,12 +38,13 @@ const Conversation = () => {
   const [mockFolders, setMockFolders] = useState([]);
   const [mockSnippets, setMockSnippets] = useState([]);
   const [mockActions, setMockActions] = useState([]);
+  const [messageCount, setMessageCount] = useState(0);
 
   // Fetch conversations on component mount
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/conversations');
+        const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/conversations');
         setConversations(response.data);
       } catch (error) {
         console.error('Error fetching conversations:', error);
@@ -57,11 +58,12 @@ useEffect(() => {
   if (selectedConversation) {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${selectedConversation._id}`);
+        const response = await axios.get(`https://lead-savvy-backend-in-progress.onrender.com/api/messages/${selectedConversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [selectedConversation._id]: response.data,
         }));
+        setMessageCount(response.data.length);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
@@ -75,7 +77,7 @@ useEffect(() => {
     if (activeTab === 'snippets') {
       const fetchSnippets = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/snippets');
+          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/snippets');
           setMockSnippets(response.data);
         } catch (error) {
           console.error('Error fetching snippets:', error);
@@ -85,7 +87,7 @@ useEffect(() => {
 
       const fetchFolders = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/folders');
+          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/folders');
           setMockFolders(response.data);
         } catch (error) {
           console.error('Error fetching folders:', error);
@@ -100,7 +102,7 @@ useEffect(() => {
     if (activeTab === 'manualActions') {
       const fetchManualActions = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/manual-actions');
+          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/manual-actions');
           setMockActions(response.data);
         } catch (error) {
           console.error('Error fetching manual actions:', error);
@@ -115,7 +117,7 @@ useEffect(() => {
     if (activeTab === 'triggerLinks') {
       const fetchTriggerLinks = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/trigger-links');
+          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links');
           setLinks(response.data);
         } catch (error) {
           console.error('Error fetching trigger links:', error);
@@ -129,7 +131,7 @@ useEffect(() => {
   const handleAddConversation = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/conversations', newConversation);
+      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/conversations', newConversation);
       setConversations([...conversations, response.data]);
       setMessages({ ...messages, [response.data.id]: [] });
       setNewConversation({
@@ -160,7 +162,7 @@ useEffect(() => {
         time: new Date().toLocaleTimeString(),
         type: 'sent'
       };
-      const response = await axios.post('http://localhost:5000/api/messages', newMessage);
+      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/messages', newMessage);
       setMessages({
         ...messages,
         [selectedConversation]: [...messages[selectedConversation], response.data],
@@ -192,14 +194,14 @@ useEffect(() => {
         type: 'text'
       };
       if (editSnippet) {
-        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -230,14 +232,14 @@ useEffect(() => {
         type: 'email'
       };
       if (editSnippet) {
-        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -261,7 +263,7 @@ useEffect(() => {
         name,
         count: 0
       };
-      const response = await axios.post('http://localhost:5000/api/folders', newFolder);
+      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/folders', newFolder);
       setMockFolders([...mockFolders, response.data]);
       setShowFolderModal(false);
     } catch (error) {
@@ -272,7 +274,7 @@ useEffect(() => {
   // Handle deleting a snippet
   const handleDeleteSnippet = async (snippetId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/snippets/${snippetId}`);
+      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${snippetId}`);
       setMockSnippets((prevSnippets) =>
         prevSnippets.filter((snippet) => snippet.id !== snippetId)
       );
@@ -287,7 +289,7 @@ useEffect(() => {
   const handleAddLink = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/trigger-links', newLink);
+      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links', newLink);
       setLinks([...links, response.data]);
       setNewLink({ name: '', url: '' });
       setShowAddLinkModal(false);
@@ -301,7 +303,7 @@ useEffect(() => {
     e.preventDefault();
     try {
       const updatedLink = { id: editLink.id, ...newLink };
-      const response = await axios.put(`http://localhost:5000/api/trigger-links/${editLink.id}`, updatedLink);
+      const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links/${editLink.id}`, updatedLink);
       setLinks((prevLinks) =>
         prevLinks.map((link) =>
           link.id === editLink.id ? response.data : link
@@ -317,7 +319,7 @@ useEffect(() => {
   // Handle deleting a trigger link
   const handleDeleteLink = async (linkId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trigger-links/${linkId}`);
+      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links/${linkId}`);
       setLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
     } catch (error) {
       console.error('Error deleting link:', error);
@@ -359,7 +361,7 @@ useEffect(() => {
     setSelectedConversation(conversation);
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${conversation._id}`);
+        const response = await axios.get(`https://lead-savvy-backend-in-progress.onrender.com/api/messages/${conversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [conversation._id]: response.data,
@@ -472,6 +474,7 @@ useEffect(() => {
                           {selectedConversation.avatar}
                         </div>
                         <h3>{selectedConversation.name}</h3>
+                        <span className="message-count">Messages sent: {messageCount}</span>
                       </div>
                     </div>
                     <div className="messages-container">

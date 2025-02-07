@@ -45,7 +45,7 @@ function Calendar() {
 
   // Axios configuration
   const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000/api/meeting',
+    baseURL: 'https://lead-savvy-backend-in-progress.onrender.com/api/meeting',
     headers: {
       'Content-Type': 'application/json',
     },

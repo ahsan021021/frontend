@@ -91,7 +91,7 @@ function NavBar(props) {
                                 getDate(dateIndex);
                             }} >Day</div>
                             <div className="logout" onClick={()=>{
-                                axios.delete("http://localhost:5000/api/User/Logout", { withCredentials: true })
+                                axios.delete("https://lead-savvy-backend-in-progress.onrender.com/api/User/Logout", { withCredentials: true })
                                 .then(function(response){
                                  if(response.status === 200){
                                      navigate('/signin')

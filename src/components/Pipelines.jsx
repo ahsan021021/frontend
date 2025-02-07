@@ -18,7 +18,7 @@ function Pipelines() {
   useEffect(() => {
     const fetchPipelines = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/pipelines');
+        const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/pipelines');
         setPipelines(response.data);
       } catch (error) {
         console.error('Error fetching pipelines:', error);
@@ -76,7 +76,7 @@ function Pipelines() {
         console.log('Payload:', payload);
 
         // Send the POST request to create a new pipeline
-        const response = await axios.post('http://localhost:5000/api/pipelines', payload);
+        const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/pipelines', payload);
 
         // Update the pipelines state with the new pipeline
         setPipelines([...pipelines, response.data]);
@@ -104,7 +104,7 @@ function Pipelines() {
 
     try {
       const updatedPipeline = { ...pipelines.find((p) => p._id === _id), name: newName };
-      await axios.put(`http://localhost:5000/api/pipelines/${_id}`, updatedPipeline);
+      await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/pipelines/${_id}`, updatedPipeline);
       setPipelines(pipelines.map((pipeline) => (pipeline._id === _id ? updatedPipeline : pipeline)));
       setEditingId(null);
     } catch (error) {
@@ -120,7 +120,7 @@ function Pipelines() {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/pipelines/${_id}`);
+      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/pipelines/${_id}`);
       setPipelines(pipelines.filter((pipeline) => pipeline._id !== _id));
     } catch (error) {
       console.error('Error deleting pipeline:', error);
