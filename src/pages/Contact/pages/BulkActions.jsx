@@ -7,7 +7,7 @@ function BulkActions() {
   useEffect(() => {
     const fetchImportHistory = async () => {
       try {
-        const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/import/history');
+        const response = await axios.get('http://localhost:5000/api/import/history');
         setImportHistory(response.data);
       } catch (error) {
         console.error('Error fetching import history:', error);

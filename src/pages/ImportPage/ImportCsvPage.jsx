@@ -148,10 +148,10 @@ function ImportCsvPage() {
 
       // Send the data to the backend
       if (selectedObjects.contacts) {
-        await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/import/contacts', transformedData);
+        await axios.post('http://localhost:5000/api/import/contacts', transformedData);
       }
       if (selectedObjects.opportunities) {
-        await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/import/opportunities', transformedData);
+        await axios.post('http://localhost:5000/api/import/opportunities', transformedData);
       }
 
       // Simulate import process

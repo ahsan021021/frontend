@@ -20,7 +20,7 @@ export default function UserCalendar() {
   const getCalendarEvents = async () => {
     try {
       console.log("before authentication");
-      const response = await axios.get("https://lead-savvy-backend-in-progress.onrender.com/api/appointments", { withCredentials: true });
+      const response = await axios.get("http://localhost:5000/api/appointments", { withCredentials: true });
 
       response.data.map((event) => {
         dispatchCallEvent({ type: "get", payload: event });

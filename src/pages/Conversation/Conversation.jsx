@@ -44,7 +44,7 @@ const Conversation = () => {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/conversations');
+        const response = await axios.get('http://localhost:5000/api/conversations');
         setConversations(response.data);
       } catch (error) {
         console.error('Error fetching conversations:', error);
@@ -58,7 +58,7 @@ useEffect(() => {
   if (selectedConversation) {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`https://lead-savvy-backend-in-progress.onrender.com/api/messages/${selectedConversation._id}`);
+        const response = await axios.get(`http://localhost:5000/api/messages/${selectedConversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [selectedConversation._id]: response.data,
@@ -77,7 +77,7 @@ useEffect(() => {
     if (activeTab === 'snippets') {
       const fetchSnippets = async () => {
         try {
-          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/snippets');
+          const response = await axios.get('http://localhost:5000/api/snippets');
           setMockSnippets(response.data);
         } catch (error) {
           console.error('Error fetching snippets:', error);
@@ -87,7 +87,7 @@ useEffect(() => {
 
       const fetchFolders = async () => {
         try {
-          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/folders');
+          const response = await axios.get('http://localhost:5000/api/folders');
           setMockFolders(response.data);
         } catch (error) {
           console.error('Error fetching folders:', error);
@@ -102,7 +102,7 @@ useEffect(() => {
     if (activeTab === 'manualActions') {
       const fetchManualActions = async () => {
         try {
-          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/manual-actions');
+          const response = await axios.get('http://localhost:5000/api/manual-actions');
           setMockActions(response.data);
         } catch (error) {
           console.error('Error fetching manual actions:', error);
@@ -117,7 +117,7 @@ useEffect(() => {
     if (activeTab === 'triggerLinks') {
       const fetchTriggerLinks = async () => {
         try {
-          const response = await axios.get('https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links');
+          const response = await axios.get('http://localhost:5000/api/trigger-links');
           setLinks(response.data);
         } catch (error) {
           console.error('Error fetching trigger links:', error);
@@ -131,7 +131,7 @@ useEffect(() => {
   const handleAddConversation = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/conversations', newConversation);
+      const response = await axios.post('http://localhost:5000/api/conversations', newConversation);
       setConversations([...conversations, response.data]);
       setMessages({ ...messages, [response.data.id]: [] });
       setNewConversation({
@@ -162,7 +162,7 @@ useEffect(() => {
         time: new Date().toLocaleTimeString(),
         type: 'sent'
       };
-      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/messages', newMessage);
+      const response = await axios.post('http://localhost:5000/api/messages', newMessage);
       setMessages({
         ...messages,
         [selectedConversation]: [...messages[selectedConversation], response.data],
@@ -194,14 +194,14 @@ useEffect(() => {
         type: 'text'
       };
       if (editSnippet) {
-        const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/snippets', newSnippet);
+        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -232,14 +232,14 @@ useEffect(() => {
         type: 'email'
       };
       if (editSnippet) {
-        const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/snippets', newSnippet);
+        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -254,6 +254,10 @@ useEffect(() => {
     }
   };
 
+  const handleFolderClick = (folderId) => {
+    setActiveFolder(folderId);
+  };
+
   // Handle creating a folder
   const handleCreateFolder = async () => {
     const name = document.querySelector('#folderName').value;
@@ -263,7 +267,7 @@ useEffect(() => {
         name,
         count: 0
       };
-      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/folders', newFolder);
+      const response = await axios.post('http://localhost:5000/api/folders', newFolder);
       setMockFolders([...mockFolders, response.data]);
       setShowFolderModal(false);
     } catch (error) {
@@ -274,7 +278,7 @@ useEffect(() => {
   // Handle deleting a snippet
   const handleDeleteSnippet = async (snippetId) => {
     try {
-      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/snippets/${snippetId}`);
+      await axios.delete(`http://localhost:5000/api/snippets/${snippetId}`);
       setMockSnippets((prevSnippets) =>
         prevSnippets.filter((snippet) => snippet.id !== snippetId)
       );
@@ -289,7 +293,7 @@ useEffect(() => {
   const handleAddLink = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links', newLink);
+      const response = await axios.post('http://localhost:5000/api/trigger-links', newLink);
       setLinks([...links, response.data]);
       setNewLink({ name: '', url: '' });
       setShowAddLinkModal(false);
@@ -303,7 +307,7 @@ useEffect(() => {
     e.preventDefault();
     try {
       const updatedLink = { id: editLink.id, ...newLink };
-      const response = await axios.put(`https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links/${editLink.id}`, updatedLink);
+      const response = await axios.put(`http://localhost:5000/api/trigger-links/${editLink.id}`, updatedLink);
       setLinks((prevLinks) =>
         prevLinks.map((link) =>
           link.id === editLink.id ? response.data : link
@@ -319,17 +323,37 @@ useEffect(() => {
   // Handle deleting a trigger link
   const handleDeleteLink = async (linkId) => {
     try {
-      await axios.delete(`https://lead-savvy-backend-in-progress.onrender.com/api/trigger-links/${linkId}`);
+      await axios.delete(`http://localhost:5000/api/trigger-links/${linkId}`);
       setLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
     } catch (error) {
       console.error('Error deleting link:', error);
     }
   };
 
+  const handleStarConversation = async (conversationId) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/conversations/${conversationId}/star`);
+      setConversations((prevConversations) =>
+        prevConversations.map((conv) =>
+          conv.id === conversationId ? { ...conv, starred: response.data.starred } : conv
+        )
+      );
+    } catch (error) {
+      console.error('Error starring conversation:', error);
+    }
+  };
+
+  const handleSubTabClick = (subTabId) => {
+    setActiveSubTab(subTabId);
+  };
+
   // Filter conversations based on search query and filters
   const filteredConversations = conversations.filter((conv) => {
     if (filterUnread && !conv.unread) return false;
     if (filterStarred && !conv.starred) return false;
+    if (activeSubTab === 'unread' && !conv.unread) return false;
+    if (activeSubTab === 'starred' && !conv.starred) return false;
+    if (activeSubTab === 'recent') return true;
     if (searchQuery) {
       return (
         conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -361,7 +385,7 @@ useEffect(() => {
     setSelectedConversation(conversation);
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`https://lead-savvy-backend-in-progress.onrender.com/api/messages/${conversation._id}`);
+        const response = await axios.get(`http://localhost:5000/api/messages/${conversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [conversation._id]: response.data,
@@ -410,7 +434,7 @@ useEffect(() => {
                     <button
                       key={tab.id}
                       className={`sub-tab ${activeSubTab === tab.id ? 'active' : ''}`}
-                      onClick={() => setActiveSubTab(tab.id)}
+                      onClick={() => handleSubTabClick(tab.id)}
                     >
                       {tab.icon && <span className="tab-icon">{tab.icon}</span>}
                       {tab.label}
@@ -443,7 +467,7 @@ useEffect(() => {
                     filteredConversations.map((conv) => (
                       <div
                         key={conv.id}
-                        className={`conversation-item ${selectedConversation?.id === conv.id ? 'selected' : ''} ${conv.unread ? 'unread' : ''}`}
+                        className={`conversation-item ${selectedConversation?._id === conv._id ? 'selected' : ''} ${conv.unread ? 'unread' : ''}`}
                         onClick={() => handleConversationClick(conv)}
                       >
                         <div className="conversation-avatar">{conv.avatar}</div>
@@ -451,9 +475,13 @@ useEffect(() => {
                           <div className="conversation-header">
                             <h4>{conv.name}</h4>
                             <span className="timestamp">{conv.timestamp}</span>
+                            {conv.starred && <FiStar className="starred-icon" />}
                           </div>
-                          <p className="last-message">{conv.lastMessage}</p>
+                          <p className="last-message">{conv.lastMessage}</p> {/* Show last message below the name */}
                         </div>
+                        <button className="star-button" onClick={() => handleStarConversation(conv.id)}>
+                          <FiStar />
+                        </button>
                       </div>
                     ))
                   ) : (
@@ -474,11 +502,10 @@ useEffect(() => {
                           {selectedConversation.avatar}
                         </div>
                         <h3>{selectedConversation.name}</h3>
-                        <span className="message-count">Messages sent: {messageCount}</span>
                       </div>
                     </div>
                     <div className="messages-container">
-                      {messages[selectedConversation.id]?.map((message) => (
+                      {messages[selectedConversation._id]?.map((message) => (
                         <div key={message.id} className={`message ${message.type}`}>
                           <div className="message-content">
                             <p>{message.content}</p>
@@ -584,7 +611,7 @@ useEffect(() => {
                       <div
                         key={folder.id}
                         className={`folder-item ${activeFolder === folder.id ? 'active' : ''}`}
-                        onClick={() => setActiveFolder(folder.id)}
+                        onClick={() => handleFolderClick(folder.id)}
                       >
                         <FiFolder />
                         <span>{folder.name}</span>

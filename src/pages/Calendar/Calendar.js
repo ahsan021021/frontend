@@ -45,7 +45,7 @@ function Calendar() {
 
   // Axios configuration
   const axiosInstance = axios.create({
-    baseURL: 'https://lead-savvy-backend-in-progress.onrender.com/api/meeting',
+    baseURL: 'http://localhost:5000/api/meeting',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -130,17 +130,17 @@ function Calendar() {
     }
   };
 
-  // Handle deleting a meeting
-  const handleDeleteMeeting = async (id) => {
+  // Handle canceling a meeting
+  const handleDeleteMeeting = async (meeting) => {
     try {
-      await axiosInstance.delete(`/${id}`);
-      const meetingToDelete = meetings.find((meeting) => meeting.id === id);
+      await axiosInstance.put(`/${meeting._id}/cancel`); // Use meeting._id
+      const meetingToDelete = meetings.find((m) => m._id === meeting._id); // Ensure you're using _id
       setPendingMeetings([...pendingMeetings, meetingToDelete]);
-      setMeetings(meetings.filter((meeting) => meeting.id !== id));
+      setMeetings(meetings.filter((m) => m._id !== meeting._id)); // Ensure you're using _id
       setShowMeetingDetails(null);
       toast.success('Meeting cancelled successfully');
     } catch (error) {
-      console.error('Error deleting meeting:', error);
+      console.error('Error cancelling meeting:', error.response.data); // Log the error response
       toast.error('Failed to cancel meeting');
     }
   };
@@ -148,10 +148,9 @@ function Calendar() {
   // Handle restoring a meeting
   const handleRestoreMeeting = async (id) => {
     try {
-      const meetingToRestore = pendingMeetings.find((meeting) => meeting.id === id);
-      const response = await axiosInstance.post('/', meetingToRestore);
+      const response = await axiosInstance.put(`/${id}/restore`); // Change to PUT request
       setMeetings([...meetings, response.data]);
-      setPendingMeetings(pendingMeetings.filter((meeting) => meeting.id !== id));
+      setPendingMeetings(pendingMeetings.filter((meeting) => meeting._id !== id)); // Ensure you're using _id
       toast.success('Meeting restored successfully');
     } catch (error) {
       console.error('Error restoring meeting:', error);
@@ -166,7 +165,7 @@ function Calendar() {
       toast.error('Please provide a reason for cancellation');
       return;
     }
-    await handleDeleteMeeting(showMeetingDetails.id);
+    await handleDeleteMeeting(showMeetingDetails);
     setShowCancelReason(false);
     setCancelReason('');
   };
@@ -238,7 +237,7 @@ function Calendar() {
               ) : (
                 <div>
                   {pendingMeetings.map((meeting) => (
-                    <div key={meeting.id} className="pending-meeting-card">
+                    <div key={meeting._id} className="pending-meeting-card">
                       <div className="pending-meeting-title">{meeting.title}</div>
                       <div className="pending-meeting-info">
                         <div className="pending-meeting-info-item">
@@ -251,7 +250,7 @@ function Calendar() {
                         </div>
                       </div>
                       <button
-                        onClick={() => handleRestoreMeeting(meeting.id)}
+                        onClick={() => handleRestoreMeeting(meeting._id)} // Use meeting._id
                         className="btn btn-restore"
                       >
                         <FaUndo className="w-4 h-4" /> Restore
@@ -273,7 +272,7 @@ function Calendar() {
                 <div>
                   {filteredMeetings.map((meeting) => (
                     <div
-                      key={meeting.id}
+                      key={meeting._id} // Use meeting._id
                       onClick={() => setShowMeetingDetails(meeting)}
                       className="meeting-card"
                     >

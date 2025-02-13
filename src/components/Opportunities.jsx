@@ -30,7 +30,7 @@ function Opportunities() {
       try {
         const pipelineId = pipelines.find((p) => p.name === selectedPipeline)?._id;
         if (pipelineId) {
-          const response = await axios.get(`https://lead-savvy-backend-in-progress.onrender.com/api/opportunities?pipelineId=${pipelineId}`);
+          const response = await axios.get(`http://localhost:5000/api/opportunities?pipelineId=${pipelineId}`);
           setOpportunities(response.data);
         }
       } catch (error) {
@@ -75,7 +75,7 @@ function Opportunities() {
 
     try {
       const pipelineId = pipelines.find((p) => p.name === selectedPipeline)?._id;
-      const response = await axios.post('https://lead-savvy-backend-in-progress.onrender.com/api/opportunities', {
+      const response = await axios.post('http://localhost:5000/api/opportunities', {
         ...newOpportunity,
         pipelineId,
       });
