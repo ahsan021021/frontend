@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../utils/axios'; // Import Axios instance with token
 import { Menu } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Contacts from './pages/Contacts';
@@ -33,7 +33,7 @@ function Contact() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get('/api/contacts');
+        const response = await axios.get('/contacts');
         setContacts(response.data);
       } catch (error) {
         console.error('Error fetching contacts:', error);
@@ -42,7 +42,7 @@ function Contact() {
 
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('/api/companies');
+        const response = await axios.get('/companies');
         setCompanies(response.data);
       } catch (error) {
         console.error('Error fetching companies:', error);
@@ -51,7 +51,7 @@ function Contact() {
 
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('/api/tasks');
+        const response = await axios.get('/tasks');
         setTasks(response.data);
       } catch (error) {
         console.error('Error fetching tasks:', error);

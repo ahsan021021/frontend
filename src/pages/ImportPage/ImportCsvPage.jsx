@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../utils/axios'; // Import Axios instance with token
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../../components/Sidebar';
@@ -27,6 +27,13 @@ function ImportCsvPage() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

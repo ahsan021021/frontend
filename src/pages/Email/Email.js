@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import axios from '../../utils/axios'; 
 import Sidebar from '../../components/Sidebar';
 import EmailMarketing from './components/EmailMarketing/EmailMarketing';
-import axios from '../../utils/axios'; 
 
 function Email() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -17,14 +17,14 @@ function Email() {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   }, []);
-  
+
   return ( 
-      <div className="app">
-        <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <div className={`main-content ${isSidebarOpen ? 'content-with-sidebar' : ''}`}>
-          <EmailMarketing />
-        </div>
+    <div className="app">
+      <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <div className={`main-content ${isSidebarOpen ? 'content-with-sidebar' : ''}`}>
+        <EmailMarketing />
       </div>
+    </div>
   );
 }
 

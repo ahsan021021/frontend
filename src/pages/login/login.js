@@ -11,14 +11,14 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("https://localhost:5000/api/login", {
+      const response = await axios.post("http://localhost:5000/api/login", {
         email,
         password,
       });
       const { token } = response.data;
       localStorage.setItem("token", token);
       setMessage("Login successful!");
-      navigate("/conversations"); // Redirect to the conversations page
+      navigate("/dashboard"); // Redirect to the conversations page
     } catch (error) {
       console.error("There was an error logging in!", error);
       setMessage("Invalid email or password");

@@ -1,15 +1,38 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './EmailMarketing.css';
 
-function Analytics({ campaigns }) {
-  const calculateStats = (campaign) => {
-    // Mock statistics - in a real app, these would come from your backend
-    return {
-      sent: Math.floor(Math.random() * 1000),
-      opened: Math.floor(Math.random() * 800),
-      clicked: Math.floor(Math.random() * 400),
-      bounced: Math.floor(Math.random() * 50)
+const instance = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add an interceptor to include the token in the headers
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token'); // Get the token from local storage
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; // Set the token in the headers
+  }
+  return config;
+});
+
+function Analytics() {
+  const [campaigns, setCampaigns] = useState([]);
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await instance.get('/campaigns'); // Use the axios instance
+        setCampaigns(response.data);
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      }
     };
-  };
+
+    fetchCampaigns();
+  }, []);
 
   return (
     <div className="analytics">
@@ -46,17 +69,16 @@ function Analytics({ campaigns }) {
           </thead>
           <tbody>
             {campaigns.map(campaign => {
-              const stats = calculateStats(campaign);
-              const openRate = ((stats.opened / stats.sent) * 100).toFixed(1);
-              const clickRate = ((stats.clicked / stats.opened) * 100).toFixed(1);
+              const openRate = ((campaign.opened / campaign.sent) * 100).toFixed(1) || 0;
+              const clickRate = ((campaign.clicked / campaign.opened) * 100).toFixed(1) || 0;
               
               return (
-                <tr key={campaign.id}>
+                <tr key={campaign._id}>
                   <td>{campaign.name}</td>
-                  <td>{stats.sent}</td>
-                  <td>{stats.opened}</td>
-                  <td>{stats.clicked}</td>
-                  <td>{stats.bounced}</td>
+                  <td>{campaign.sent}</td>
+                  <td>{campaign.opened}</td>
+                  <td>{campaign.clicked}</td>
+                  <td>{campaign.bounced}</td>
                   <td>{openRate}%</td>
                   <td>{clickRate}%</td>
                 </tr>

@@ -1,9 +1,40 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './EmailMarketing.css';
 
-function Reports({ campaigns }) {
+const instance = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add an interceptor to include the token in the headers
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token'); // Get the token from local storage
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; // Set the token in the headers
+  }
+  return config;
+});
+
+function Reports() {
+  const [campaigns, setCampaigns] = useState([]);
   const [dateRange, setDateRange] = useState('last30');
-  
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await instance.get('/campaigns'); // Use the axios instance
+        setCampaigns(response.data);
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      }
+    };
+
+    fetchCampaigns();
+  }, []);
+
   return (
     <div className="reports">
       <div className="header">
@@ -23,33 +54,23 @@ function Reports({ campaigns }) {
       <div className="reports-overview">
         <div className="metric-card">
           <h3>Total Sent</h3>
-          <p>24,892</p>
+          <p>{campaigns.reduce((total, campaign) => total + campaign.sent, 0)}</p>
           <span className="trend positive">+12.5%</span>
         </div>
         <div className="metric-card">
           <h3>Open Rate</h3>
-          <p>32.4%</p>
+          <p>{((campaigns.reduce((total, campaign) => total + campaign.opened, 0) / campaigns.reduce((total, campaign) => total + campaign.sent, 0)) * 100).toFixed(1) || 0}%</p>
           <span className="trend positive">+2.1%</span>
         </div>
         <div className="metric-card">
           <h3>Click Rate</h3>
-          <p>4.8%</p>
+          <p>{((campaigns.reduce((total, campaign) => total + campaign.clicked, 0) / campaigns.reduce((total, campaign) => total + campaign.opened, 0)) * 100).toFixed(1) || 0}%</p>
           <span className="trend negative">-0.3%</span>
         </div>
         <div className="metric-card">
           <h3>Unsubscribes</h3>
-          <p>0.2%</p>
+          <p>{0.2}%</p>
           <span className="trend neutral">0%</span>
-        </div>
-      </div>
-
-      <div className="report-charts">
-        <div className="chart-container">
-          <h3>Email Performance Trends</h3>
-          <div className="chart-placeholder">
-            {/* Chart would go here */}
-            <div className="mock-chart"></div>
-          </div>
         </div>
       </div>
 
@@ -67,12 +88,12 @@ function Reports({ campaigns }) {
           </thead>
           <tbody>
             {campaigns.map(campaign => (
-              <tr key={campaign.id}>
+              <tr key={campaign._id}>
                 <td>{campaign.name}</td>
-                <td>{Math.floor(Math.random() * 10000)}</td>
-                <td>{Math.floor(Math.random() * 80)}%</td>
-                <td>{Math.floor(Math.random() * 40)}%</td>
-                <td>{Math.floor(Math.random() * 10)}%</td>
+                <td>{campaign.sent}</td>
+                <td>{campaign.opened}</td>
+                <td>{campaign.clicked}</td>
+                <td>{((campaign.clicked / campaign.sent) * 100).toFixed(1) || 0}%</td>
               </tr>
             ))}
           </tbody>

@@ -1,8 +1,18 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Select from 'react-select/creatable';
+import Modal from './Modal';
+import Dropzone from 'react-dropzone';
+import Papa from 'papaparse';
 import './EmailMarketing.css';
 
-function CampaignCreator({ campaigns, subscribers, templates, onCreateCampaign, onSaveCampaign }) {
+function CampaignCreator({ campaigns, setCampaigns }) {
   const [showForm, setShowForm] = useState(false);
+  const [showCSVModal, setShowCSVModal] = useState(false);
+  const [showMappingModal, setShowMappingModal] = useState(false);
+  const [csvData, setCsvData] = useState([]);
+  const [csvColumns, setCsvColumns] = useState([]);
+  const [selectedEmailColumn, setSelectedEmailColumn] = useState('');
   const [campaign, setCampaign] = useState({
     name: '',
     subject: '',
@@ -11,17 +21,183 @@ function CampaignCreator({ campaigns, subscribers, templates, onCreateCampaign, 
     recipients: [],
     scheduledDate: ''
   });
+  const [templates, setTemplates] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const token = localStorage.getItem('token'); // Get the JWT token from local storage
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (campaign.id) {
-      onSaveCampaign(campaign);
-    } else {
-      onCreateCampaign(campaign);
+  // Create axios instance with authorization token
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:5000/api',
+    headers: {
+      Authorization: `Bearer ${token}`
     }
+  });
+
+  // Fetch campaigns from the backend
+  const fetchCampaigns = async () => {
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      const response = await axiosInstance.get('/campaigns');
+      setCampaigns(response.data);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      setError('Failed to fetch campaigns. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch templates from the backend
+  const fetchTemplates = async () => {
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      const response = await axiosInstance.get('/templates');
+      setTemplates(response.data);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      setError('Failed to fetch templates. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch subscribers from the backend
+  const fetchSubscribers = async () => {
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      const response = await axiosInstance.get('/subscribers');
+      setSubscribers(response.data);
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+      setError('Failed to fetch subscribers. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCampaigns();
+    fetchTemplates();
+    fetchSubscribers();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      const campaignData = {
+        ...campaign,
+        recipients: campaign.recipients.map(recipient => recipient.value || recipient.label)
+      };
+      if (campaign.id) {
+        // Update existing campaign
+        await axiosInstance.put(`/campaigns/${campaign.id}`, campaignData);
+      } else {
+        // Create new campaign
+        await axiosInstance.post('/campaigns', campaignData);
+      }
+      resetForm();
+      fetchCampaigns(); // Refresh the campaign list after creating or updating
+    } catch (error) {
+      console.error('Error saving campaign:', error);
+      setError('Failed to save campaign. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
     setCampaign({ name: '', subject: '', content: '', template: '', recipients: [], scheduledDate: '' });
     setShowForm(false);
   };
+
+  const handleEditCampaign = (campaign) => {
+    setCampaign({
+      ...campaign,
+      recipients: campaign.recipients.map(recipient => ({
+        value: recipient._id,
+        label: recipient.email
+      }))
+    });
+    setShowForm(true);
+  };
+
+  const handleDeleteCampaign = async (id) => {
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      await axiosInstance.delete(`/campaigns/${id}`);
+      fetchCampaigns(); // Refresh the campaign list after deletion
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      setError('Failed to delete campaign. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendCampaign = async (id) => {
+    setLoading(true);
+    setError(''); // Reset error message
+    try {
+      await axiosInstance.post(`/campaigns/${id}/send`);
+      alert('Campaign sent successfully!');
+    } catch (error) {
+      console.error('Error sending campaign:', error);
+      setError('Failed to send campaign. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectAllRecipients = () => {
+    setCampaign({
+      ...campaign,
+      recipients: subscribers.map(subscriber => ({
+        value: subscriber.email,
+        label: subscriber.email
+      }))
+    });
+  };
+
+  const handleRecipientChange = (selectedOptions) => {
+    setCampaign({ ...campaign, recipients: selectedOptions });
+  };
+
+  const handleCSVImport = (acceptedFiles) => {
+    const file = acceptedFiles[0];
+    Papa.parse(file, {
+      header: true,
+      complete: (results) => {
+        setCsvData(results.data);
+        setCsvColumns(Object.keys(results.data[0]));
+        setShowCSVModal(false);
+        setShowMappingModal(true);
+      }
+    });
+  };
+
+  const handleMappingSubmit = () => {
+    const emails = csvData.map(row => row[selectedEmailColumn]).filter(email => email);
+    const newRecipients = emails.map(email => ({
+      value: email,
+      label: email
+    }));
+
+    setCampaign({ ...campaign, recipients: [...campaign.recipients, ...newRecipients] });
+    setShowMappingModal(false);
+  };
+
+  const recipientOptions = subscribers.map(subscriber => ({
+    value: subscriber.email,
+    label: subscriber.email
+  }));
 
   return (
     <div className="campaign-creator">
@@ -30,50 +206,95 @@ function CampaignCreator({ campaigns, subscribers, templates, onCreateCampaign, 
         <button onClick={() => setShowForm(true)}>Create Campaign</button>
       </div>
 
-      {showForm && (
+      {error && <div className="error-message">{error}</div>}
+      {loading && <div className="loading-message">Loading...</div>}
+
+      <Modal isOpen={showForm} onClose={resetForm}>
         <form className="campaign-form" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Campaign Name"
             value={campaign.name}
-            onChange={(e) => setCampaign({...campaign, name: e.target.value})}
+            onChange={(e) => setCampaign({ ...campaign, name: e.target.value })}
             required
           />
           <input
             type="text"
             placeholder="Email Subject"
             value={campaign.subject}
-            onChange={(e) => setCampaign({...campaign, subject: e.target.value})}
+            onChange={(e) => setCampaign({ ...campaign, subject: e.target.value })}
             required
           />
-          <select
-            value={campaign.template}
-            onChange={(e) => setCampaign({...campaign, template: e.target.value})}
+          <select value={campaign.template}
+            onChange={(e) => setCampaign({ ...campaign, template: e.target.value })}
             required
           >
             <option value="">Select Template</option>
             {templates.map(template => (
-              <option key={template.id} value={template.id}>{template.name}</option>
+              <option key={template._id} value={template._id}>{template.name}</option>
             ))}
           </select>
           <textarea
             placeholder="Email Content"
             value={campaign.content}
-            onChange={(e) => setCampaign({...campaign, content: e.target.value})}
+            onChange={(e) => setCampaign({ ...campaign, content: e.target.value })}
             required
           />
           <input
             type="datetime-local"
             value={campaign.scheduledDate}
-            onChange={(e) => setCampaign({...campaign, scheduledDate: e.target.value})}
+            onChange={(e) => setCampaign({ ...campaign, scheduledDate: e.target.value })}
             required
           />
+          <div className="recipients-section">
+            <label>Select Recipients:</label>
+            <button type="button" onClick={handleSelectAllRecipients}>Select All</button>
+            <Select
+              isMulti
+              options={recipientOptions}
+              value={campaign.recipients}
+              onChange={handleRecipientChange}
+              placeholder="Type to search and select recipients..."
+              noOptionsMessage={() => 'No subscribers found'}
+              isCreatable
+            />
+            <button type="button" onClick={() => setShowCSVModal(true)}>Import from CSV</button>
+          </div>
           <div className="form-actions">
             <button type="submit">Save Campaign</button>
-            <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="button" onClick={resetForm}>Cancel</button>
           </div>
         </form>
-      )}
+      </Modal>
+
+      <Modal isOpen={showCSVModal} onClose={() => setShowCSVModal(false)}>
+        <div className="csv-import-modal">
+          <h3>Import Recipients from CSV</h3>
+          <Dropzone onDrop={handleCSVImport}>
+            {({ getRootProps, getInputProps }) => (
+              <div {...getRootProps()} className="dropzone">
+                <input {...getInputProps()} />
+                <p>Drag & drop a CSV file here, or click to select a file</p>
+              </div>
+            )}
+          </Dropzone>
+          <button onClick={() => setShowCSVModal(false)}>Cancel</button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showMappingModal} onClose={() => setShowMappingModal(false)}>
+        <div className="mapping-modal">
+          <h3>Map Email Column</h3>
+          <select onChange={(e) => setSelectedEmailColumn(e.target.value)} value={selectedEmailColumn}>
+            <option value="">Select Email Column</option>
+            {csvColumns.map(column => (
+              <option key={column} value={column}>{column}</option>
+            ))}
+          </select>
+          <button onClick={handleMappingSubmit}>Submit</button>
+          <button onClick={() => setShowMappingModal(false)}>Cancel</button>
+        </div>
+      </Modal>
 
       <table>
         <thead>
@@ -87,15 +308,15 @@ function CampaignCreator({ campaigns, subscribers, templates, onCreateCampaign, 
         </thead>
         <tbody>
           {campaigns.map(campaign => (
-            <tr key={campaign.id}>
+            <tr key={campaign._id}>
               <td>{campaign.name}</td>
               <td>{campaign.subject}</td>
               <td>{campaign.status}</td>
               <td>{new Date(campaign.scheduledDate).toLocaleString()}</td>
               <td>
-                <button className="action-btn">Edit</button>
-                <button className="action-btn">Send Now</button>
-                <button className="action-btn delete">Delete</button>
+                <button className="action-btn" onClick={() => handleEditCampaign(campaign)}>Edit</button>
+                <button className="action-btn" onClick={() => handleSendCampaign(campaign._id)}>Send Now</button>
+                <button className="action-btn" onClick={() => handleDeleteCampaign(campaign._id)}>Delete</button>
               </td>
             </tr>
           ))}

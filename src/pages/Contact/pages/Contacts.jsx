@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import axios from '../../../utils/axios'; // Correct import path for Axios instance
 
 function Contacts() {
-  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -20,7 +18,7 @@ function Contacts() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/contacts');
+        const response = await axios.get('/contacts');
         setContacts(response.data);
       } catch (error) {
         console.error('Error fetching contacts:', error);
@@ -59,7 +57,7 @@ function Contacts() {
   const handleAddContact = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/contacts', newContact);
+      const response = await axios.post('/contacts', newContact);
       setContacts([...contacts, response.data]);
       setNewContact({
         name: '',
@@ -76,7 +74,7 @@ function Contacts() {
 
   const handleDeleteContact = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/contacts/${id}`);
+      await axios.delete(`/contacts/${id}`);
       setContacts(contacts.filter(contact => contact._id !== id));
       setSelectedContacts(selectedContacts.filter(selectedId => selectedId !== id));
       closePopup();
@@ -91,7 +89,7 @@ function Contacts() {
       return;
     }
     try {
-      await Promise.all(selectedContacts.map(id => axios.delete(`http://localhost:5000/api/contacts/${id}`)));
+      await Promise.all(selectedContacts.map(id => axios.delete(`/contacts/${id}`)));
       setContacts(contacts.filter(contact => !selectedContacts.includes(contact._id)));
       setSelectedContacts([]);
     } catch (error) {
@@ -111,7 +109,7 @@ function Contacts() {
           <button className="tool-btn" title="Delete Selected Contacts" onClick={handleDeleteSelectedContacts}>
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-              <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+              <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
             </svg>
           </button>
         </div>

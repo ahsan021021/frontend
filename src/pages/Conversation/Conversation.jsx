@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import axios from '../../utils/axios'; // Import Axios instance with token
 import { FiSearch, FiFilter, FiPlus, FiUser, FiMessageSquare, FiStar, FiClock, FiX, FiSmile, FiPaperclip, FiZap, FiFolder, FiEdit2, FiTrash2, FiMoreVertical, FiPhone, FiMail } from 'react-icons/fi';
 import Sidebar from '../../components/Sidebar'; // Import Sidebar component
-import axios from 'axios'; // Import Axios
+
+
+
 import './Conversation.css';
+const token = localStorage.getItem('token'); // Retrieve token from local storage
+
+
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set the token in Axios headers
+
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set the token in Axios headers
+
+
+
 
 const Conversation = () => {
   const [activeTab, setActiveTab] = useState('conversations');
@@ -44,7 +56,7 @@ const Conversation = () => {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/conversations');
+        const response = await axios.get('/conversations');
         setConversations(response.data);
       } catch (error) {
         console.error('Error fetching conversations:', error);
@@ -58,7 +70,7 @@ useEffect(() => {
   if (selectedConversation) {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${selectedConversation._id}`);
+        const response = await axios.get(`/messages/conversation/${selectedConversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [selectedConversation._id]: response.data,
@@ -77,7 +89,7 @@ useEffect(() => {
     if (activeTab === 'snippets') {
       const fetchSnippets = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/snippets');
+          const response = await axios.get('/snippets');
           setMockSnippets(response.data);
         } catch (error) {
           console.error('Error fetching snippets:', error);
@@ -87,7 +99,7 @@ useEffect(() => {
 
       const fetchFolders = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/folders');
+          const response = await axios.get('/folders');
           setMockFolders(response.data);
         } catch (error) {
           console.error('Error fetching folders:', error);
@@ -102,7 +114,7 @@ useEffect(() => {
     if (activeTab === 'manualActions') {
       const fetchManualActions = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/manual-actions');
+          const response = await axios.get('/manual-actions');
           setMockActions(response.data);
         } catch (error) {
           console.error('Error fetching manual actions:', error);
@@ -117,7 +129,7 @@ useEffect(() => {
     if (activeTab === 'triggerLinks') {
       const fetchTriggerLinks = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/api/trigger-links');
+          const response = await axios.get('/trigger-links');
           setLinks(response.data);
         } catch (error) {
           console.error('Error fetching trigger links:', error);
@@ -131,7 +143,7 @@ useEffect(() => {
   const handleAddConversation = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/conversations', newConversation);
+      const response = await axios.post('/conversations', newConversation);
       setConversations([...conversations, response.data]);
       setMessages({ ...messages, [response.data.id]: [] });
       setNewConversation({
@@ -144,7 +156,9 @@ useEffect(() => {
       });
       setShowAddConversationModal(false);
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      alert('Failed to create conversation. Please try again.'); // Notify user of the error
+      console.error('Error creating conversation:', error); // Log the error for debugging
+
     }
   };
 
@@ -156,20 +170,20 @@ useEffect(() => {
 
     try {
       const newMessage = {
-        conversationId: selectedConversation,
+        conversationId: selectedConversation._id,
         sender: 'Agent',
         content: messageContent,
         time: new Date().toLocaleTimeString(),
         type: 'sent'
       };
-      const response = await axios.post('http://localhost:5000/api/messages', newMessage);
-      setMessages({
-        ...messages,
-        [selectedConversation]: [...messages[selectedConversation], response.data],
-      });
+      const response = await axios.post('/messages', newMessage);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [selectedConversation._id]: [...prevMessages[selectedConversation._id], response.data],
+      }));
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
-          conv.id === selectedConversation
+          conv._id === selectedConversation._id
             ? { ...conv, lastMessage: messageContent, timestamp: newMessage.time }
             : conv
         )
@@ -194,14 +208,14 @@ useEffect(() => {
         type: 'text'
       };
       if (editSnippet) {
-        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        const response = await axios.post('/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -232,14 +246,14 @@ useEffect(() => {
         type: 'email'
       };
       if (editSnippet) {
-        const response = await axios.put(`http://localhost:5000/api/snippets/${editSnippet.id}`, newSnippet);
+        const response = await axios.put(`/snippets/${editSnippet.id}`, newSnippet);
         setMockSnippets((prevSnippets) =>
           prevSnippets.map((snippet) =>
             snippet.id === editSnippet.id ? response.data : snippet
           )
         );
       } else {
-        const response = await axios.post('http://localhost:5000/api/snippets', newSnippet);
+        const response = await axios.post('/snippets', newSnippet);
         setMockSnippets([...mockSnippets, response.data]);
         setMockFolders((prevFolders) =>
           prevFolders.map((f) =>
@@ -267,7 +281,7 @@ useEffect(() => {
         name,
         count: 0
       };
-      const response = await axios.post('http://localhost:5000/api/folders', newFolder);
+      const response = await axios.post('/folders', newFolder);
       setMockFolders([...mockFolders, response.data]);
       setShowFolderModal(false);
     } catch (error) {
@@ -278,7 +292,7 @@ useEffect(() => {
   // Handle deleting a snippet
   const handleDeleteSnippet = async (snippetId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/snippets/${snippetId}`);
+      await axios.delete(`/snippets/${snippetId}`);
       setMockSnippets((prevSnippets) =>
         prevSnippets.filter((snippet) => snippet.id !== snippetId)
       );
@@ -293,7 +307,7 @@ useEffect(() => {
   const handleAddLink = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/trigger-links', newLink);
+      const response = await axios.post('/trigger-links', newLink);
       setLinks([...links, response.data]);
       setNewLink({ name: '', url: '' });
       setShowAddLinkModal(false);
@@ -307,7 +321,7 @@ useEffect(() => {
     e.preventDefault();
     try {
       const updatedLink = { id: editLink.id, ...newLink };
-      const response = await axios.put(`http://localhost:5000/api/trigger-links/${editLink.id}`, updatedLink);
+      const response = await axios.put(`/trigger-links/${editLink.id}`, updatedLink);
       setLinks((prevLinks) =>
         prevLinks.map((link) =>
           link.id === editLink.id ? response.data : link
@@ -323,37 +337,28 @@ useEffect(() => {
   // Handle deleting a trigger link
   const handleDeleteLink = async (linkId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trigger-links/${linkId}`);
+      await axios.delete(`/trigger-links/${linkId}`);
       setLinks((prevLinks) => prevLinks.filter((link) => link.id !== linkId));
     } catch (error) {
       console.error('Error deleting link:', error);
     }
   };
 
-  const handleStarConversation = async (conversationId) => {
+  // Handle deleting a conversation
+  const handleDeleteConversation = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/conversations/${conversationId}/star`);
-      setConversations((prevConversations) =>
-        prevConversations.map((conv) =>
-          conv.id === conversationId ? { ...conv, starred: response.data.starred } : conv
-        )
-      );
+      await axios.delete(`/conversations/${selectedConversation._id}`);
+      setConversations(conversations.filter(conv => conv._id !== selectedConversation._id));
+      setSelectedConversation(null);
     } catch (error) {
-      console.error('Error starring conversation:', error);
+      console.error('Error deleting conversation:', error);
     }
   };
 
-  const handleSubTabClick = (subTabId) => {
-    setActiveSubTab(subTabId);
-  };
-
-  // Filter conversations based on search query and filters
+  // Filter conversations based on search query, filters, and active sub-tab
   const filteredConversations = conversations.filter((conv) => {
-    if (filterUnread && !conv.unread) return false;
-    if (filterStarred && !conv.starred) return false;
     if (activeSubTab === 'unread' && !conv.unread) return false;
     if (activeSubTab === 'starred' && !conv.starred) return false;
-    if (activeSubTab === 'recent') return true;
     if (searchQuery) {
       return (
         conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -385,7 +390,7 @@ useEffect(() => {
     setSelectedConversation(conversation);
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${conversation._id}`);
+        const response = await axios.get(`/messages/${conversation._id}`);
         setMessages((prevMessages) => ({
           ...prevMessages,
           [conversation._id]: response.data,
@@ -434,7 +439,7 @@ useEffect(() => {
                     <button
                       key={tab.id}
                       className={`sub-tab ${activeSubTab === tab.id ? 'active' : ''}`}
-                      onClick={() => handleSubTabClick(tab.id)}
+                      onClick={() => setActiveSubTab(tab.id)}
                     >
                       {tab.icon && <span className="tab-icon">{tab.icon}</span>}
                       {tab.label}
@@ -466,7 +471,7 @@ useEffect(() => {
                   {filteredConversations.length > 0 ? (
                     filteredConversations.map((conv) => (
                       <div
-                        key={conv.id}
+                        key={conv._id}
                         className={`conversation-item ${selectedConversation?._id === conv._id ? 'selected' : ''} ${conv.unread ? 'unread' : ''}`}
                         onClick={() => handleConversationClick(conv)}
                       >
@@ -475,13 +480,9 @@ useEffect(() => {
                           <div className="conversation-header">
                             <h4>{conv.name}</h4>
                             <span className="timestamp">{conv.timestamp}</span>
-                            {conv.starred && <FiStar className="starred-icon" />}
                           </div>
                           <p className="last-message">{conv.lastMessage}</p> {/* Show last message below the name */}
                         </div>
-                        <button className="star-button" onClick={() => handleStarConversation(conv.id)}>
-                          <FiStar />
-                        </button>
                       </div>
                     ))
                   ) : (
@@ -503,6 +504,9 @@ useEffect(() => {
                         </div>
                         <h3>{selectedConversation.name}</h3>
                       </div>
+                      <button className="delete-conversation-btn" onClick={handleDeleteConversation}>
+                        <FiTrash2 /> Delete Conversation
+                      </button>
                     </div>
                     <div className="messages-container">
                       {messages[selectedConversation._id]?.map((message) => (

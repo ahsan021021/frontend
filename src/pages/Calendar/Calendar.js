@@ -16,7 +16,7 @@ import {
 } from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaClock, FaVideo, FaEnvelope, FaTimes, FaUndo } from 'react-icons/fa';
 import { Toaster, toast } from 'react-hot-toast';
-import axios from 'axios';
+import axios from '../../utils/axios'; // Import Axios instance with token
 import './Calendar.css';
 
 function Calendar() {
@@ -43,18 +43,10 @@ function Calendar() {
     email: '',
   });
 
-  // Axios configuration
-  const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000/api/meeting',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
   // Fetch meetings from the backend
   const fetchMeetings = async () => {
     try {
-      const response = await axiosInstance.get('/');
+      const response = await axios.get('/meeting');
       setMeetings(response.data);
     } catch (error) {
       console.error('Error fetching meetings:', error);
@@ -113,7 +105,7 @@ function Calendar() {
     }
 
     try {
-      const response = await axiosInstance.post('/', newEvent);
+      const response = await axios.post('/meeting', newEvent);
       setMeetings([...meetings, response.data]);
       setShowAddEvent(false);
       setNewEvent({
@@ -133,7 +125,7 @@ function Calendar() {
   // Handle canceling a meeting
   const handleDeleteMeeting = async (meeting) => {
     try {
-      await axiosInstance.put(`/${meeting._id}/cancel`); // Use meeting._id
+      await axios.put(`/meeting/${meeting._id}/cancel`); // Use meeting._id
       const meetingToDelete = meetings.find((m) => m._id === meeting._id); // Ensure you're using _id
       setPendingMeetings([...pendingMeetings, meetingToDelete]);
       setMeetings(meetings.filter((m) => m._id !== meeting._id)); // Ensure you're using _id
@@ -148,7 +140,7 @@ function Calendar() {
   // Handle restoring a meeting
   const handleRestoreMeeting = async (id) => {
     try {
-      const response = await axiosInstance.put(`/${id}/restore`); // Change to PUT request
+      const response = await axios.put(`/meeting/${id}/restore`); // Change to PUT request
       setMeetings([...meetings, response.data]);
       setPendingMeetings(pendingMeetings.filter((meeting) => meeting._id !== id)); // Ensure you're using _id
       toast.success('Meeting restored successfully');

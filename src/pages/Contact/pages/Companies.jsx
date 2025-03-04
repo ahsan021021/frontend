@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../../utils/axios'; // Correct import path for Axios instance
 
 const Companies = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -21,7 +21,7 @@ const Companies = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/companies');
+        const response = await axios.get('/companies');
         setCompanies(response.data);
       } catch (error) {
         console.error('Error fetching companies:', error);
@@ -49,7 +49,7 @@ const Companies = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/companies', formData);
+      const response = await axios.post('/companies', formData);
       setCompanies([...companies, response.data]);
       setFormData({
         name: '',

@@ -1,7 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import './EmailMarketing.css';
 
-function SubscriberList({ subscribers, onAddSubscriber, onDeleteSubscriber }) {
+const instance = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add an interceptor to include the token in the headers
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token'); // Get the token from local storage
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; // Set the token in the headers
+  }
+  return config;
+});
+
+function SubscriberList({ onAddSubscriber, onDeleteSubscriber }) {
+  const [subscribers, setSubscribers] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSubscriber, setNewSubscriber] = useState({
     email: '',
@@ -11,22 +29,52 @@ function SubscriberList({ subscribers, onAddSubscriber, onDeleteSubscriber }) {
   const [editingSubscriber, setEditingSubscriber] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingSubscriber) {
-      onAddSubscriber({ ...newSubscriber, id: editingSubscriber.id });
-      setEditingSubscriber(null);
-    } else {
-      onAddSubscriber(newSubscriber);
+  // Fetch subscribers from the backend
+  const fetchSubscribers = async () => {
+    try {
+      const response = await instance.get('/subscribers');
+      setSubscribers(response.data);
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
     }
-    setNewSubscriber({ email: '', name: '', status: 'active' });
-    setShowAddForm(false);
+  };
+
+  useEffect(() => {
+    fetchSubscribers();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSubscriber) {
+        // Update existing subscriber
+        await instance.put(`/subscribers/${editingSubscriber.id}`, newSubscriber);
+        setEditingSubscriber(null);
+      } else {
+        // Create new subscriber
+        await instance.post('/subscribers', newSubscriber);
+      }
+      setNewSubscriber({ email: '', name: '', status: 'active' });
+      setShowAddForm(false);
+      fetchSubscribers(); // Refresh the subscriber list after creating or updating
+    } catch (error) {
+      console.error('Error saving subscriber:', error);
+    }
   };
 
   const handleEdit = (subscriber) => {
     setEditingSubscriber(subscriber);
     setNewSubscriber({ ...subscriber });
     setShowAddForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await instance.delete(`/subscribers/${id}`);
+      fetchSubscribers(); // Refresh the subscriber list after deletion
+    } catch (error) {
+      console.error('Error deleting subscriber:', error);
+    }
   };
 
   const filteredSubscribers = subscribers.filter(subscriber =>
@@ -56,19 +104,19 @@ function SubscriberList({ subscribers, onAddSubscriber, onDeleteSubscriber }) {
             type="email"
             placeholder="Email"
             value={newSubscriber.email}
-            onChange={(e) => setNewSubscriber({...newSubscriber, email: e.target.value})}
+            onChange={(e) => setNewSubscriber({ ...newSubscriber, email: e.target.value })}
             required
           />
           <input
             type="text"
             placeholder="Name"
             value={newSubscriber.name}
-            onChange={(e) => setNewSubscriber({...newSubscriber, name: e.target.value})}
+            onChange={(e) => setNewSubscriber({ ...newSubscriber, name: e.target.value })}
             required
           />
           <select
             value={newSubscriber.status}
-            onChange={(e) => setNewSubscriber({...newSubscriber, status: e.target.value})}
+            onChange={(e) => setNewSubscriber({ ...newSubscriber, status: e.target.value })}
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -113,7 +161,7 @@ function SubscriberList({ subscribers, onAddSubscriber, onDeleteSubscriber }) {
                 </button>
                 <button 
                   className="action-btn delete"
-                  onClick={() => onDeleteSubscriber(subscriber.id)}
+                  onClick={() => handleDelete(subscriber.id)}
                 >
                   Delete
                 </button>

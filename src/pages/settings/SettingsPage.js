@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Users, CreditCard, Briefcase, Menu, ArrowLeft, Bell, Globe, Shield, Mail, Palette } from 'lucide-react';
 import Sidebar from '../../components/Sidebar2';
@@ -12,25 +12,35 @@ import Localization from '../../components/Localization';
 import Security from '../../components/Security';
 import EmailSettings from '../../components/EmailSettings';
 import Appearance from '../../components/Appearance';
+import axios from '../../utils/axios'; // Import Axios instance with token
 import './SettingsPage.css';
 
 function SettingsPage() {
   const [activeMenu, setActiveMenu] = useState('business');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
+  const [settings, setSettings] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('/settings');
+        setSettings(response.data);
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const menuItems = [
     { id: 'business', label: 'Business Profile', icon: Settings },
     { id: 'profile', label: 'My Profile', icon: Users },
-    { id: 'billing', label: 'Billing', icon: CreditCard },
-    { id: 'staff', label: 'Staff Settings', icon: Users },
     { id: 'opportunities', label: 'Opportunities', icon: Briefcase },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'localization', label: 'Localization', icon: Globe },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'email', label: 'Email Settings', icon: Mail },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
   ];
 
   const handleBack = () => {
@@ -43,22 +53,12 @@ function SettingsPage() {
         return <BusinessProfile />;
       case 'profile':
         return <MyProfile />;
-      case 'billing':
-        return <Billing />;
-      case 'staff':
-        return <Staff />;
       case 'opportunities':
         return <Opportunities />;
-      case 'notifications':
-        return <Notifications />;
       case 'localization':
         return <Localization />;
-      case 'security':
-        return <Security />;
       case 'email':
         return <EmailSettings />;
-      case 'appearance':
-        return <Appearance />;
       default:
         return <BusinessProfile />;
     }

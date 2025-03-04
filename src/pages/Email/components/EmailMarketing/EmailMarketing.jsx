@@ -8,6 +8,14 @@ import Settings from './Settings/Settings';
 import Automation from './Automation';
 import Segments from './Segments';
 import Reports from './Reports';
+import axios from 'axios'; // Import axios directly
+
+const instance = axios.create({
+  baseURL: 'http://localhost:5000/api', // Use the specified URL
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 function EmailMarketing() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -15,80 +23,87 @@ function EmailMarketing() {
   const [campaigns, setCampaigns] = useState([]);
   const [templates, setTemplates] = useState([]);
 
+  // Fetch initial data from the backend
+  const fetchData = async () => {
+    try {
+      const [subscribersResponse, campaignsResponse, templatesResponse] = await Promise.all([
+        instance.get('/subscribers'),
+        instance.get('/campaigns'),
+        instance.get('/templates')
+      ]);
+      setSubscribers(subscribersResponse.data);
+      setCampaigns(campaignsResponse.data);
+      setTemplates(templatesResponse.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
   useEffect(() => {
-    // Mock data initialization
-    const mockSubscribers = Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      email: `user${i + 1}@example.com`,
-      name: `User ${i + 1}`,
-      status: Math.random() > 0.2 ? 'active' : 'inactive',
-      tags: ['newsletter'],
-      lastActive: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    }));
-    setSubscribers(mockSubscribers);
-
-    const mockCampaigns = Array.from({ length: 5 }, (_, i) => ({
-      id: i + 1,
-      name: `Campaign ${i + 1}`,
-      subject: `Subject for Campaign ${i + 1}`,
-      status: ['active', 'draft', 'completed'][Math.floor(Math.random() * 3)],
-      type: ['automated', 'regular'][Math.floor(Math.random() * 2)],
-      engagement: Math.floor(Math.random() * 100),
-      scheduledDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    }));
-    setCampaigns(mockCampaigns);
-
-    const mockTemplates = Array.from({ length: 3 }, (_, i) => ({
-      id: i + 1,
-      name: `Template ${i + 1}`,
-      category: ['newsletter', 'promotion', 'announcement'][i % 3],
-      content: '<h1>Sample Template</h1><p>This is a sample template content.</p>'
-    }));
-    setTemplates(mockTemplates);
+    fetchData();
   }, []);
 
-  const handleAddSubscriber = (subscriber) => {
-    const newSubscriber = {
-      ...subscriber,
-      id: subscribers.length + 1,
-      tags: ['new'],
-      lastActive: new Date().toISOString().split('T')[0]
-    };
-    setSubscribers([...subscribers, newSubscriber]);
+  const handleAddSubscriber = async (subscriber) => {
+    try {
+      const response = await instance.post('/subscribers', subscriber);
+      setSubscribers([...subscribers, response.data]);
+    } catch (error) {
+      console.error('Error adding subscriber:', error);
+    }
   };
 
-  const handleDeleteSubscriber = (id) => {
-    setSubscribers(subscribers.filter(sub => sub.id !== id));
+  const handleDeleteSubscriber = async (id) => {
+    try {
+      await instance.delete(`/subscribers/${id}`);
+      setSubscribers(subscribers.filter(sub => sub.id !== id));
+    } catch (error) {
+      console.error('Error deleting subscriber:', error);
+    }
   };
 
-  const handleCreateCampaign = (campaign) => {
-    const newCampaign = {
-      ...campaign,
-      id: campaigns.length + 1,
-      status: 'draft',
-      engagement: 0
-    };
-    setCampaigns([...campaigns, newCampaign]);
+  const handleCreateCampaign = async (campaign) => {
+    try {
+      const response = await instance.post('/campaigns', campaign);
+      setCampaigns([...campaigns, response.data]);
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+    }
   };
 
-  const handleSaveCampaign = (campaign) => {
-    setCampaigns(campaigns.map(c => c.id === campaign.id ? campaign : c));
+  const handleSaveCampaign = async (campaign) => {
+    try {
+      const response = await instance.put(`/campaigns/${campaign.id}`, campaign);
+      setCampaigns(campaigns.map(c => (c.id === campaign.id ? response.data : c)));
+    } catch (error) {
+      console.error('Error saving campaign:', error);
+    }
   };
 
-  const handleDeleteCampaign = (id) => {
-    setCampaigns(campaigns.filter(c => c.id !== id));
+  const handleDeleteCampaign = async (id) => {
+    try {
+      await instance.delete(`/campaigns/${id}`);
+      setCampaigns(campaigns.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+    }
   };
 
-  const handleCreateTemplate = (template) => {
-    const newTemplate = {
-      ...template,
-      id: templates.length + 1
-    };
-    setTemplates([...templates, newTemplate]);
+  const handleCreateTemplate = async (template) => {
+    try {
+      const response = await instance.post('/templates', template);
+      setTemplates([...templates, response.data]);
+    } catch (error) {
+      console.error('Error creating template:', error);
+    }
   };
 
-  const handleDeleteTemplate = (id) => {
-    setTemplates(templates.filter(t => t.id !== id));
+  const handleDeleteTemplate = async (id) => {
+    try {
+      await instance.delete(`/templates/${id}`);
+      setTemplates(templates.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting template:', error);
+    }
   };
 
   return (
@@ -151,6 +166,7 @@ function EmailMarketing() {
         {activeTab === 'subscribers' && (
           <SubscriberList 
             subscribers={subscribers} 
+            setTemplates={setTemplates} // Pass setTemplates as a prop
             onAddSubscriber={handleAddSubscriber}
             onDeleteSubscriber={handleDeleteSubscriber}
           />
@@ -158,6 +174,7 @@ function EmailMarketing() {
         {activeTab === 'campaigns' && (
           <CampaignCreator 
             campaigns={campaigns}
+            setCampaigns={setCampaigns} // Pass setCampaigns as a prop
             subscribers={subscribers}
             templates={templates}
             onCreateCampaign={handleCreateCampaign}
@@ -166,7 +183,7 @@ function EmailMarketing() {
           />
         )}
         {activeTab === 'automation' && (
-          <Automation campaigns={campaigns} />
+          <Automation />
         )}
         {activeTab === 'segments' && (
           <Segments subscribers={subscribers} />
@@ -174,7 +191,7 @@ function EmailMarketing() {
         {activeTab === 'templates' && (
           <Templates 
             templates={templates}
-            setTemplates={setTemplates}
+            setTemplates={setTemplates} // Pass setTemplates as a prop
             onCreateTemplate={handleCreateTemplate}
             onDeleteTemplate={handleDeleteTemplate}
           />

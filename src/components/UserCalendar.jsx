@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import dayjs from "dayjs";
 import EventModal from "./EventModal";
-import axios from "axios";
+import axios from "../../utils/axios";
 import NavBar from "./NavBar";
 import SideBar from "./SideBar";
 import { getMonth } from "./Month";
@@ -20,7 +20,7 @@ export default function UserCalendar() {
   const getCalendarEvents = async () => {
     try {
       console.log("before authentication");
-      const response = await axios.get("http://localhost:5000/api/appointments", { withCredentials: true });
+      const response = await axios.get("/appointments");
 
       response.data.map((event) => {
         dispatchCallEvent({ type: "get", payload: event });
@@ -50,8 +50,24 @@ export default function UserCalendar() {
 
   // Fetch calendar events on component mount
   useEffect(() => {
-    getCalendarEvents();
-  }, []);
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.get('/validate-token')
+        .then(response => {
+          if (!response.data.valid) {
+            navigate('/login');
+          } else {
+            getCalendarEvents();
+          }
+        })
+        .catch(() => {
+          navigate('/login');
+        });
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   // Update month or date views when the index changes
   useEffect(() => {
