@@ -828,8 +828,58 @@ textarea {
   align-items: center;
   margin-bottom: 1rem;
 }
-
 .snippet-actions {
   display: flex;
   gap: 0.5rem;
+}
+/* Main container for the page */
+.conversation-page {
+  display: flex;
+  height: 100vh; /* Full height of the viewport */
+  width: 100vw; /* Full width of the viewport */
+  overflow: hidden; /* Prevent scrolling */
+}
+
+/* Sidebar styling */
+.conversation-page > *:first-child {
+  flex: 0 0 250px; /* Fixed width for the sidebar */
+  height: 100%; /* Full height */
+  background-color: #f4f4f4; /* Optional: Background color for the sidebar */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional: Shadow for the sidebar */
+}
+
+/* Main content area */
+.coming-soon-main {
+  flex: 1; /* Take up the remaining space */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #1b1b1b; /* Light background color */
+  padding: 20px;
+}
+
+/* Image styling */
+.coming-soon-image {
+  max-width: 600px; /* Limit the maximum width of the image */
+  width: 100%; /* Make the image responsive */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: 20px;
+  fill: #a0a0a0;
+}
+
+/* Title styling */
+.coming-soon-title {
+  font-size: 2.5rem; /* Larger font size for the title */
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Description styling */
+.coming-soon-description {
+  font-size: 1.5rem; /* Larger font size for the description */
+  color: #555;
+  max-width: 800px; /* Limit the width of the text */
+  margin: 0 auto; /* Center the text */
 }

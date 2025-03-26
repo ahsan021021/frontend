@@ -22,12 +22,10 @@ function Contact() {
 
   const menuItems = [
     { id: 'contacts', label: 'Contacts' },
-    { id: 'smartLists', label: 'Smart Lists' },
     { id: 'bulkActions', label: 'Bulk Actions' },
     { id: 'restore', label: 'Restore' },
     { id: 'tasks', label: 'Tasks' },
     { id: 'companies', label: 'Companies' },
-    { id: 'manageSmartLists', label: 'Manage Smart Lists' },
   ];
 
   useEffect(() => {
@@ -67,8 +65,6 @@ function Contact() {
     switch(currentPage) {
       case 'contacts':
         return <Contacts contacts={contacts} onButtonClick={handleButtonClick} />;
-      case 'smartLists':
-        return <SmartLists />;
       case 'bulkActions':
         return <BulkActions />;
       case 'restore':
@@ -77,8 +73,6 @@ function Contact() {
         return <Tasks tasks={tasks} />;
       case 'companies':
         return <Companies companies={companies} />;
-      case 'manageSmartLists':
-        return <ManageSmartLists />;
       default:
         return <Contacts contacts={contacts} />;
     }

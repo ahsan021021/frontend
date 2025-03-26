@@ -7,21 +7,50 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false); // Track loading state
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setLoading(true); // Set loading to true when login starts
     try {
       const response = await axios.post("http://localhost:5000/api/login", {
         email,
         password,
       });
+
+      // If login is successful, store the token and navigate to the dashboard
       const { token } = response.data;
       localStorage.setItem("token", token);
       setMessage("Login successful!");
-      navigate("/dashboard"); // Redirect to the conversations page
+      navigate("/dashboard"); // Redirect to the dashboard page
     } catch (error) {
       console.error("There was an error logging in!", error);
-      setMessage("Invalid email or password");
+
+      // Handle error messages from the backend
+      const errorMessage = error.response?.data?.message;
+
+      if (errorMessage === "Please verify your email first") {
+        // Resend the verification email
+        try {
+          const resendResponse = await axios.post("http://localhost:5000/api/resend-verification-email", {
+            email,
+          });
+
+          // Show a success message and redirect to the Verify page
+          setMessage("Verification email sent. Redirecting to verification page...");
+          setTimeout(() => {
+            navigate("/verify-email", { state: { email } }); // Redirect to the Verify page with the email
+          }, 1500); // 1.5-second delay
+        } catch (resendError) {
+          console.error("Error resending verification email:", resendError);
+          setMessage("Failed to resend verification email. Please try again.");
+        }
+      } else {
+        // Display other error messages
+        setMessage(errorMessage || "Invalid email or password");
+      }
+    } finally {
+      setLoading(false); // Set loading to false when login is complete
     }
   };
 
@@ -50,9 +79,15 @@ const Login = () => {
           />
         </div>
         {message && <div className="message">{message}</div>}
-        <div className="forgot-password">Forgot password?</div>
-        <button className="login-button" onClick={handleLogin}>
-          LOGIN
+        <div className="forgot-password">
+          <a href="/forgot-password">Forgot password?</a>
+        </div>
+        <button
+          className="login-button"
+          onClick={handleLogin}
+          disabled={loading} // Disable the button while loading
+        >
+          {loading ? "Logging in..." : "LOGIN"} {/* Show loading text */}
         </button>
         <div className="social-login">
           <p>Or Sign Up Using</p>
@@ -69,7 +104,7 @@ const Login = () => {
           </div>
         </div>
         <div className="signup">
-          Or Sign Up Using <a href="#">SIGN UP</a>
+          Or Sign Up Using <a href="/signup">SIGN UP</a>
         </div>
       </div>
       <div className="right">

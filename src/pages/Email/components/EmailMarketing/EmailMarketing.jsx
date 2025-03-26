@@ -9,6 +9,7 @@ import Automation from './Automation';
 import Segments from './Segments';
 import Reports from './Reports';
 import axios from 'axios'; // Import axios directly
+import { useNavigate } from 'react-router-dom';
 
 const instance = axios.create({
   baseURL: 'http://localhost:5000/api', // Use the specified URL
@@ -22,6 +23,7 @@ function EmailMarketing() {
   const [subscribers, setSubscribers] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const Navigate = useNavigate();
 
   // Fetch initial data from the backend
   const fetchData = async () => {
@@ -128,12 +130,6 @@ function EmailMarketing() {
           Campaigns
         </button>
         <button 
-          className={activeTab === 'automation' ? 'active' : ''} 
-          onClick={() => setActiveTab('automation')}
-        >
-          Automation
-        </button>
-        <button 
           className={activeTab === 'segments' ? 'active' : ''} 
           onClick={() => setActiveTab('segments')}
         >
@@ -153,7 +149,7 @@ function EmailMarketing() {
         </button>
         <button 
           className={activeTab === 'settings' ? 'active' : ''} 
-          onClick={() => setActiveTab('settings')}
+          onClick={() => Navigate('/settings')}
         >
           Settings
         </button>

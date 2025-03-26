@@ -5,6 +5,7 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../../components/Sidebar';
 import Papa from 'papaparse';
 import './ImportCsvPage.css';
+import { useNavigate } from 'react-router-dom';
 
 const REQUIRED_CONTACT_FIELDS = ['name', 'company', 'email', 'phone'];
 const REQUIRED_OPPORTUNITY_FIELDS = ['contactId', 'opportunityName', 'pipeline'];
@@ -27,6 +28,7 @@ function ImportCsvPage() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -163,6 +165,7 @@ function ImportCsvPage() {
 
       // Simulate import process
       alert('Import started successfully!');
+      navigate('/contact')
     } catch (error) {
       console.error('Import failed:', error);
       alert('Import failed. Please try again.');

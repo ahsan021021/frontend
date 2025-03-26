@@ -32,22 +32,12 @@ const ScraperForm = ({ onSubmit, isLoading }) => {
     setLocations(locations.filter(l => l !== location));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (keywords.length > 0 && locations.length > 0) {
-      try {
-        console.log('Submitting form with data:', { keywords, locations });
-        // Make API call to scrape data
-        const response = await axios.post('http://localhost:5000/api/scrape', {
-          keywords,
-          locations,
-        });
-        console.log('API response:', response.data);
-        // Pass the results to the parent component
-        onSubmit(response.data);
-      } catch (error) {
-        console.error('Error scraping data:', error);
-      }
+      console.log('Submitting form with data:', { keywords, locations });
+      // Pass the form data to the parent component
+      onSubmit({ keywords, locations });
     } else {
       console.log('Keywords and locations are required.');
     }

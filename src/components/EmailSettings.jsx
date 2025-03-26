@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail } from 'lucide-react';
 import axios from 'axios';
 
@@ -10,6 +10,35 @@ function EmailSettings() {
   const [fromName, setFromName] = useState('');
   const [security, setSecurity] = useState('tls');
 
+  // Fetch current email settings when the page loads
+  useEffect(() => {
+    const fetchEmailSettings = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/email-settings', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (response.status === 200) {
+          const settings = response.data;
+          setSmtpServer(settings.smtpServer || '');
+          setPort(settings.port || '');
+          setFromEmail(settings.fromEmail || '');
+          setEmailPassword(settings.emailPassword || '');
+          setFromName(settings.fromName || '');
+          setSecurity(settings.security || 'tls');
+        }
+      } catch (error) {
+        console.error('Error fetching email settings:', error);
+        alert('Failed to fetch email settings. Please try again.');
+      }
+    };
+
+    fetchEmailSettings();
+  }, []);
+
+  // Handle form submission to update email settings
   const handleSubmit = async (event) => {
     event.preventDefault();
     const emailSettingsData = {
@@ -25,11 +54,11 @@ function EmailSettings() {
       const response = await axios.post('http://localhost:5000/api/email-settings', emailSettingsData, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
-      if (response.status === 200) {
+      if (response.status === 201 || response.status === 200) {
         alert('Email settings updated successfully');
       } else {
         alert('Failed to update email settings');

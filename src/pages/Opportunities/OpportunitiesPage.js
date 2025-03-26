@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
-import Opportunities from '../../components/Opportunities';
+import Opportunities from '../../components/Opportunities.jsx';
 import Pipelines from '../../components/Pipelines';
 import BulkActions from '../../components/BulkActions';
 import { PipelineProvider } from '../../context/PipelineContext';
@@ -8,7 +8,6 @@ import Sidebar from '../../components/Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import './OpportunitiesPage.css';
-
 function OpportunitiesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 

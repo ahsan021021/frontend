@@ -120,6 +120,7 @@
     color: var(--text-light);
   }
   
+  
   .button-primary:hover {
     background-color: var(--secondary-color);
   }
@@ -352,6 +353,23 @@
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+  }
+  .stage-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .stage-card:hover {
+    border-color: var(--primary-color);
+  }
+  
+  .selected-stage {
+    border-color: var(--primary-color);
+    background-color: var(--highlight-bg);
   }
   
   .stage-pill {

@@ -60,12 +60,12 @@ const CSVHistory = ({ csvHistory, onDownload, onDelete, onView }) => {
                     <FaFileDownload />
                   </button>
                   <button 
-                    className="btn-icon btn-danger" 
-                    onClick={() => onDelete(csv.id)}
-                    title="Delete"
-                  >
-                    <FaTrash />
-                  </button>
+  className="btn-icon btn-danger" 
+  onClick={() => onDelete(csv._id)} // Use _id instead of id
+  title="Delete"
+>
+  <FaTrash />
+</button>
                 </td>
               </tr>
             ))}

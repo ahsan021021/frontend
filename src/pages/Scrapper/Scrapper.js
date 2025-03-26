@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios'; // Import Axios
-import './Scrapper.css';
-import ScraperForm from './components/ScraperForm';
-import ResultsTable from './components/ResultsTable';
-import Header from './components/Header';
-import Sidebar from '../../components/Sidebar';
-import CSVHistory from './components/CSVHistory';
-import ExportManager from './components/ExportManager';
+import './Scrapper.css'; // Ensure this file exists in the same folder as Scrapper.js
+import ScraperForm from './components/ScraperForm'; // Adjust the path if needed
+import ResultsTable from './components/ResultsTable'; // Adjust the path if needed
+import Header from './components/Header'; // Adjust the path if needed
+import Sidebar from './../../components/Sidebar'; // Adjust the path if needed
+import CSVHistory from './components/CSVHistory'; // Adjust the path if needed
+import ExportManager from './components/ExportManager'; // Adjust the path if needed
 import { FaBars } from 'react-icons/fa';
 
 function Scraper() {
@@ -21,7 +21,12 @@ function Scraper() {
   useEffect(() => {
     const fetchCSVHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/history');
+        const token = localStorage.getItem('token'); // Get token from localStorage
+        const response = await axios.get('http://localhost:5000/api/history', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        });
         setCsvHistory(response.data);
       } catch (err) {
         console.error('Error fetching CSV history:', err);
@@ -39,8 +44,17 @@ function Scraper() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:5000/api/scrape', formData);
-      setResults(response.data); // Set the results from the backend
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      const response = await axios.post(
+        'http://localhost:5000/api/scrape',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        }
+      );
+      setResults(response.data); // Set the resultss from the backend
     } catch (err) {
       setError('An error occurred while scraping. Please try again.');
     } finally {
@@ -52,7 +66,16 @@ function Scraper() {
   const exportToCSV = async (customResults = results) => {
     if (customResults.length === 0) return;
     try {
-      const response = await axios.post('http://localhost:5000/api/export', { results: customResults });
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      const response = await axios.post(
+        'http://localhost:5000/api/export',
+        { results: customResults },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        }
+      );
       const { csvContent, fileName } = response.data;
 
       // Create a downloadable CSV file
@@ -71,8 +94,8 @@ function Scraper() {
         id: Date.now().toString(),
         date: new Date().toLocaleString(),
         fileName,
-        keywords: [...new Set(customResults.map(item => item.category))],
-        locations: [...new Set(customResults.map(item => item.location))],
+        keywords: [...new Set(customResults.map((item) => item.category))],
+        locations: [...new Set(customResults.map((item) => item.location))],
         recordCount: customResults.length,
         data: csvContent,
       };
@@ -98,8 +121,13 @@ function Scraper() {
   // Delete CSV from history
   const handleDeleteFromHistory = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/history/${id}`);
-      setCsvHistory(csvHistory.filter(csv => csv.id !== id));
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      await axios.delete(`http://localhost:5000/api/scrapehistory/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token to headers
+        },
+      });
+      setCsvHistory(csvHistory.filter((csv) => csv.id !== id));
     } catch (err) {
       console.error('Error deleting CSV history:', err);
     }
@@ -109,7 +137,7 @@ function Scraper() {
   const handleViewFromHistory = (csv) => {
     const lines = csv.data.split('\n');
     const headers = lines[0].split(',');
-    const parsedResults = lines.slice(1).map(line => {
+    const parsedResults = lines.slice(1).map((line) => {
       const values = line.split(',');
       const result = {};
       headers.forEach((header, index) => {
@@ -127,10 +155,10 @@ function Scraper() {
   // Merge multiple CSV exports
   const handleMergeExports = (exportsToMerge) => {
     let allResults = [];
-    exportsToMerge.forEach(csv => {
+    exportsToMerge.forEach((csv) => {
       const lines = csv.data.split('\n');
       const headers = lines[0].split(',');
-      const parsedResults = lines.slice(1).map(line => {
+      const parsedResults = lines.slice(1).map((line) => {
         const values = line.split(',');
         const result = {};
         headers.forEach((header, index) => {
@@ -153,57 +181,57 @@ function Scraper() {
         <div className="header-container">
           <Header />
         </div>
-        
+
         <div className="tab-navigation">
-          <button 
+          <button
             className={`tab-button ${activeTab === 'scraper' ? 'active' : ''}`}
             onClick={() => setActiveTab('scraper')}
           >
             Scraper
           </button>
-          <button 
+          <button
             className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
           >
             CSV History {csvHistory.length > 0 && <span className="history-badge">{csvHistory.length}</span>}
           </button>
-          <button 
+          <button
             className={`tab-button ${activeTab === 'exports' ? 'active' : ''}`}
             onClick={() => setActiveTab('exports')}
           >
             Export Manager
           </button>
         </div>
-        
+
         {activeTab === 'scraper' && (
           <>
             <ScraperForm onSubmit={handleScrape} isLoading={isLoading} />
-            <ResultsTable 
-              results={results} 
-              isLoading={isLoading} 
-              error={error} 
-              onExport={() => exportToCSV(results)} 
+            <ResultsTable
+              results={results}
+              isLoading={isLoading}
+              error={error}
+              onExport={() => exportToCSV(results)}
             />
           </>
         )}
-        
+
         {activeTab === 'history' && (
-          <CSVHistory 
-            csvHistory={csvHistory} 
+          <CSVHistory
+            csvHistory={csvHistory}
             onDownload={handleDownloadFromHistory}
             onDelete={handleDeleteFromHistory}
             onView={handleViewFromHistory}
           />
         )}
-        
+
         {activeTab === 'exports' && (
-          <ExportManager 
+          <ExportManager
             csvHistory={csvHistory}
             onExport={handleDownloadFromHistory}
             onMerge={handleMergeExports}
           />
         )}
-        
+
         <footer className="footer">
           <p>© 2025 Google Maps Scraper | All Rights Reserved</p>
         </footer>

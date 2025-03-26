@@ -9,10 +9,12 @@ const SignUp = () => {
     const [password, setPassword] = useState('');
     const [noEmails, setNoEmails] = useState(false);
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false); // Track loading state
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // Set loading to true when signup starts
         try {
             const response = await axios.post("http://localhost:5000/api/signup", {
                 email,
@@ -28,7 +30,14 @@ const SignUp = () => {
             }, 3000); // 3 seconds delay
         } catch (error) {
             console.error("There was an error signing up!", error);
-            setMessage("Failed to sign up. Please try again.");
+            // Display the error message from the server response
+            if (error.response && error.response.data && error.response.data.message) {
+                setMessage(error.response.data.message); // Use the server-provided error message
+            } else {
+                setMessage("An unexpected error occurred. Please try again."); // Fallback message
+            }
+        } finally {
+            setLoading(false); // Set loading to false when signup is complete
         }
     };
 
@@ -82,7 +91,13 @@ const SignUp = () => {
                         </label>
                     </div>
                     {message && <div className="message">{message}</div>}
-                    <button className="login-button" type="submit">Sign Up</button>
+                    <button
+                        className="login-button"
+                        type="submit"
+                        disabled={loading} // Disable the button while loading
+                    >
+                        {loading ? "Signing up..." : "Sign Up"} {/* Show loading text */}
+                    </button>
                 </form>
                 <div className="social-login">
                     <p>Or Sign Up Using</p>
@@ -95,7 +110,7 @@ const SignUp = () => {
                         <a href="https://www.behance.net" target="_blank" rel="noopener noreferrer"><i className="fab fa-behance"></i></a>
                     </div>
                 </div>
-                <div className="signup">Already have an account? <a href="#">Login</a></div>
+                <div className="signup">Already have an account? <a href="/login">Login</a></div>
             </div>
             <div className="right">
                 <div className="red-side"></div>

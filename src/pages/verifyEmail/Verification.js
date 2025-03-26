@@ -1,29 +1,36 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 const Verification = () => {
     const [verificationCode, setVerificationCode] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false); // Track loading state
     const location = useLocation();
     const navigate = useNavigate();
     const { email } = location.state || {};
 
     const handleVerify = async (e) => {
         e.preventDefault();
+        setLoading(true); // Set loading to true when verification starts
         try {
             const response = await axios.post("http://localhost:5000/api/verify-email", {
                 email,
                 verificationCode,
             });
             console.log(response.data);
+            const { token } = response.data;
+            localStorage.setItem("token", token);
             setMessage("Email verified successfully!");
-            // Delay before redirecting to login page or dashboard
+            // Delay before redirecting to the welcome page
             setTimeout(() => {
-                navigate('/dashboard');
+                navigate('/welcome');
             }, 3000); // 3 seconds delay
         } catch (error) {
             console.error("There was an error verifying the email!", error);
             setMessage("Invalid verification code. Please try again.");
+        } finally {
+            setLoading(false); // Set loading to false when verification is complete
         }
     };
 
@@ -44,7 +51,13 @@ const Verification = () => {
                         />
                     </div>
                     {message && <div className="message">{message}</div>}
-                    <button className="login-button" type="submit">Submit</button>
+                    <button
+                        className="login-button"
+                        type="submit"
+                        disabled={loading} // Disable the button while loading
+                    >
+                        {loading ? "Verifying..." : "Submit"} {/* Show loading text */}
+                    </button>
                 </form>
             </div>
             <div className="right">

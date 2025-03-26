@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 import axios from '../../../utils/axios'; // Correct import path for Axios instance
 
 function Contacts() {
@@ -14,6 +15,7 @@ function Contacts() {
     created: new Date().toISOString()
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -97,6 +99,10 @@ function Contacts() {
     }
   };
 
+  const handleImportContacts = () => {
+    navigate('/import'); // Redirect to the import page
+  };
+
   return (
     <div className="page-content">
       <div className="toolbar">
@@ -112,6 +118,11 @@ function Contacts() {
               <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
             </svg>
           </button>
+          <button className="tool-btn" title="Import Contacts" onClick={handleImportContacts}>
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M1.5 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5zm13 0a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5zm-7.354 3.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V13.5a.5.5 0 0 1-1 0V5.707L5.854 8.354a.5.5 0 1 1-.708-.708l3-3z"/>
+            </svg>
+          </button>
         </div>
         <div className="right-tools">
           <input 
@@ -124,6 +135,7 @@ function Contacts() {
         </div>
       </div>
 
+      {/* Rest of the component remains unchanged */}
       <div className="contacts-table">
         <div className="table-header">
           <input 
@@ -170,6 +182,7 @@ function Contacts() {
         ))}
       </div>
 
+      {/* Popup logic remains unchanged */}
       {isPopupOpen && (
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>

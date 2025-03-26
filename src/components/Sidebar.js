@@ -1,10 +1,45 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faBolt, faBrain, faTachometerAlt, faAddressBook, faComments, faCalendarAlt, faCreditCard, faEnvelope, faFileAlt, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faBolt, faTachometerAlt, faAddressBook, faComments, faCalendarAlt, faCreditCard, faEnvelope, faFileAlt, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import axios from "axios";
 import "./Sidebar.css";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
+  const [user, setUser] = useState({ firstName: "", lastName: "" });
+  const navigate = useNavigate(); // Hook to navigate programmatically
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Get the token from localStorage
+        const response = await axios.get("http://localhost:5000/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the headers
+          },
+        });
+
+        // Set the user's first name and last name
+        setUser({
+          firstName: response.data.firstName || "First Name",
+          lastName: response.data.lastName || "Last Name",
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleLogout = () => {
+    // Remove the token from localStorage
+    localStorage.removeItem("token");
+
+    // Redirect to the login page
+    navigate("/login");
+  };
+
   return (
     <div className={`sidebar ${isSidebarOpen ? "sidebar-open" : ""}`}>
       <div className="sidebar-header">
@@ -18,13 +53,13 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           <div className="profile">
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIs3peZbmHi0e-uTv4_RB4RWFfqEzE7BNNSg&s"
-              alt="Profile of Kaneer Kerla"
+              alt="Profile"
               width="50"
               height="50"
             />
             <div>
-              <span>Kaneer Kerla</span>
-              <span>Austin, Texas</span>
+              {/* Display the user's first name and last name */}
+              <span>{`${user.firstName} ${user.lastName}`}</span>
             </div>
           </div>
         </div>
@@ -68,9 +103,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
         <NavLink to="/settings" activeClassName="active">
           <FontAwesomeIcon icon={faCog} className="menu-icon" /> Settings
         </NavLink>
-        <NavLink to="/login" activeClassName="active">
+        <button className="logout-button" onClick={handleLogout}>
           <FontAwesomeIcon icon={faSignOutAlt} className="menu-icon" /> Logout
-        </NavLink>
+        </button>
       </div>
     </div>
   );

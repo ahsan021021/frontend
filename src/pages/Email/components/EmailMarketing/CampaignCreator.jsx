@@ -10,6 +10,7 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   const [showForm, setShowForm] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [showMappingModal, setShowMappingModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [csvData, setCsvData] = useState([]);
   const [csvColumns, setCsvColumns] = useState([]);
   const [selectedEmailColumn, setSelectedEmailColumn] = useState('');
@@ -38,13 +39,13 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   // Fetch campaigns from the backend
   const fetchCampaigns = async () => {
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
     try {
       const response = await axiosInstance.get('/campaigns');
       setCampaigns(response.data);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
-      setError('Failed to fetch campaigns. Please try again later.');
+      setError(error.response?.data?.message || 'Failed to fetch campaigns. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -53,13 +54,13 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   // Fetch templates from the backend
   const fetchTemplates = async () => {
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
     try {
       const response = await axiosInstance.get('/templates');
       setTemplates(response.data);
     } catch (error) {
       console.error('Error fetching templates:', error);
-      setError('Failed to fetch templates. Please try again later.');
+      setError(error.response?.data?.message || 'Failed to fetch templates. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -68,13 +69,13 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   // Fetch subscribers from the backend
   const fetchSubscribers = async () => {
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
     try {
       const response = await axiosInstance.get('/subscribers');
       setSubscribers(response.data);
     } catch (error) {
       console.error('Error fetching subscribers:', error);
-      setError('Failed to fetch subscribers. Please try again later.');
+      setError(error.response?.data?.message || 'Failed to fetch subscribers. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -89,12 +90,29 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
+
+    // Validation
+    if (!campaign.name || !campaign.subject || !campaign.content || !campaign.template || campaign.recipients.length === 0) {
+      setError('Please fill in all required fields and select at least one recipient.');
+      setLoading(false);
+      return;
+    }
+
+    if (new Date(campaign.scheduledDate) < new Date()) {
+      setError('Scheduled date cannot be in the past.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const campaignData = {
         ...campaign,
-        recipients: campaign.recipients.map(recipient => recipient.value || recipient.label)
+        recipients: campaign.recipients
+          .filter(recipient => recipient !== null && recipient !== undefined)
+          .map(recipient => recipient.value || recipient.label)
       };
+
       if (campaign.id) {
         // Update existing campaign
         await axiosInstance.put(`/campaigns/${campaign.id}`, campaignData);
@@ -102,8 +120,9 @@ function CampaignCreator({ campaigns, setCampaigns }) {
         // Create new campaign
         await axiosInstance.post('/campaigns', campaignData);
       }
+
       resetForm();
-      fetchCampaigns(); // Refresh the campaign list after creating or updating
+      fetchCampaigns();
     } catch (error) {
       console.error('Error saving campaign:', error);
       setError('Failed to save campaign. Please try again.');
@@ -120,20 +139,24 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   const handleEditCampaign = (campaign) => {
     setCampaign({
       ...campaign,
+      id: campaign._id,
       recipients: campaign.recipients.map(recipient => ({
-        value: recipient._id,
-        label: recipient.email
+        value: recipient,
+        label: recipient
       }))
     });
     setShowForm(true);
   };
 
   const handleDeleteCampaign = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this campaign?');
+    if (!confirmDelete) return;
+
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
     try {
       await axiosInstance.delete(`/campaigns/${id}`);
-      fetchCampaigns(); // Refresh the campaign list after deletion
+      fetchCampaigns();
     } catch (error) {
       console.error('Error deleting campaign:', error);
       setError('Failed to delete campaign. Please try again.');
@@ -144,7 +167,7 @@ function CampaignCreator({ campaigns, setCampaigns }) {
 
   const handleSendCampaign = async (id) => {
     setLoading(true);
-    setError(''); // Reset error message
+    setError('');
     try {
       await axiosInstance.post(`/campaigns/${id}/send`);
       alert('Campaign sent successfully!');
@@ -184,7 +207,15 @@ function CampaignCreator({ campaigns, setCampaigns }) {
   };
 
   const handleMappingSubmit = () => {
-    const emails = csvData.map(row => row[selectedEmailColumn]).filter(email => email);
+    const emails = csvData
+      .map(row => row[selectedEmailColumn])
+      .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+
+    if (emails.length === 0) {
+      alert('No valid email addresses found in the selected column.');
+      return;
+    }
+
     const newRecipients = emails.map(email => ({
       value: email,
       label: email
@@ -225,7 +256,8 @@ function CampaignCreator({ campaigns, setCampaigns }) {
             onChange={(e) => setCampaign({ ...campaign, subject: e.target.value })}
             required
           />
-          <select value={campaign.template}
+          <select
+            value={campaign.template}
             onChange={(e) => setCampaign({ ...campaign, template: e.target.value })}
             required
           >
@@ -261,7 +293,9 @@ function CampaignCreator({ campaigns, setCampaigns }) {
             <button type="button" onClick={() => setShowCSVModal(true)}>Import from CSV</button>
           </div>
           <div className="form-actions">
-            <button type="submit">Save Campaign</button>
+            <button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Campaign'}
+            </button>
             <button type="button" onClick={resetForm}>Cancel</button>
           </div>
         </form>
@@ -293,6 +327,21 @@ function CampaignCreator({ campaigns, setCampaigns }) {
           </select>
           <button onClick={handleMappingSubmit}>Submit</button>
           <button onClick={() => setShowMappingModal(false)}>Cancel</button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showPreview} onClose={() => setShowPreview(false)}>
+        <div className="preview-modal">
+          <h3>Email Preview</h3>
+          <div
+            className="email-preview"
+            dangerouslySetInnerHTML={{
+              __html: templates.find(template => template._id === campaign.template)?.content
+                .replace('{{name}}', 'Recipient Name') // Example name
+                .replace('{{content}}', campaign.content) // Inject campaign content
+            }}
+          />
+          <button onClick={() => setShowPreview(false)}>Close</button>
         </div>
       </Modal>
 

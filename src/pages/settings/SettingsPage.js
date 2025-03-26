@@ -37,9 +37,9 @@ function SettingsPage() {
   const menuItems = [
     { id: 'business', label: 'Business Profile', icon: Settings },
     { id: 'profile', label: 'My Profile', icon: Users },
-    { id: 'opportunities', label: 'Opportunities', icon: Briefcase },
     { id: 'localization', label: 'Localization', icon: Globe },
     { id: 'security', label: 'Security', icon: Shield },
+    { id: 'billing', label: 'Billing', icon: CreditCard },
     { id: 'email', label: 'Email Settings', icon: Mail },
   ];
 
@@ -53,8 +53,8 @@ function SettingsPage() {
         return <BusinessProfile />;
       case 'profile':
         return <MyProfile />;
-      case 'opportunities':
-        return <Opportunities />;
+      case 'billing':
+        return <Billing />;
       case 'localization':
         return <Localization />;
       case 'email':

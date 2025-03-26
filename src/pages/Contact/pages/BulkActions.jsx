@@ -7,7 +7,14 @@ function BulkActions() {
   useEffect(() => {
     const fetchImportHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/import/history');
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/import/history',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add token to headers
+            },
+          }
+        );
         setImportHistory(response.data);
       } catch (error) {
         console.error('Error fetching import history:', error);

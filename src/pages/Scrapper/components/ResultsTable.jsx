@@ -1,7 +1,12 @@
 import React from 'react';
-import { FaFileDownload, FaStar, FaGlobe, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
+import { FaFileDownload, FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe, FaStar } from 'react-icons/fa';
 
-const ResultsTable = ({ results, isLoading, error, onExport }) => {
+const ResultsTable = ({ results = [], isLoading, error, onExport }) => {
+  if (!Array.isArray(results)) {
+    console.error('Results is not an array:', results);
+    results = []; // Fallback to an empty array
+  }
+
   if (isLoading) {
     return (
       <div className="results-section">
@@ -54,6 +59,7 @@ const ResultsTable = ({ results, isLoading, error, onExport }) => {
                 <th>Business Name</th>
                 <th><FaMapMarkerAlt /> Address</th>
                 <th><FaPhone /> Phone</th>
+                <th><FaEnvelope /> Email</th>
                 <th><FaGlobe /> Website</th>
                 <th><FaStar /> Rating</th>
                 <th>Reviews</th>
@@ -67,6 +73,7 @@ const ResultsTable = ({ results, isLoading, error, onExport }) => {
                   <td>{result.businessName}</td>
                   <td>{result.address}</td>
                   <td>{result.phone}</td>
+                  <td>{result.email || 'N/A'}</td>
                   <td>
                     <a href={result.website} target="_blank" rel="noopener noreferrer">
                       {result.website}
