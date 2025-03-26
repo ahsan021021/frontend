@@ -16,7 +16,7 @@ function Localization() {
   useEffect(() => {
     const fetchLocalization = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/localization', {
+        const response = await axios.get('http://82.180.137.7:5000/api/localization', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } // Include the token in the request
         });
         const settings = response.data;
@@ -52,7 +52,7 @@ function Localization() {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/localization', localizationData, {
+      const response = await axios.post('http://82.180.137.7:5000/api/localization', localizationData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}` // Include the token in the request

@@ -32,7 +32,7 @@ const Verify = () => {
       // Debugging: Log the request body
       console.log("Request body:", { email, verificationCode: code });
 
-      const response = await axios.post("http://localhost:5000/api/verify-code", {
+      const response = await axios.post("http://82.180.137.7:5000/api/verify-code", {
         email: email, // Ensure this is not undefined
         verificationCode: code, // Ensure this matches the backend field name
       });

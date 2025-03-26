@@ -44,7 +44,7 @@ function Dashboard() {
 
       try {
         // Fetch email scraped history
-        const emailsResponse = await axios.get("http://localhost:5000/api/history/emails", { headers });
+        const emailsResponse = await axios.get("http://82.180.137.7:5000/api/history/emails", { headers });
         const totalEmails = emailsResponse.data.reduce((sum, entry) => sum + entry.count, 0);
         setEmails({
           total: totalEmails,
@@ -52,7 +52,7 @@ function Dashboard() {
         });
 
         // Fetch contact added history
-        const contactsResponse = await axios.get("http://localhost:5000/api/history/contacts", { headers });
+        const contactsResponse = await axios.get("http://82.180.137.7:5000/api/history/contacts", { headers });
         const totalContacts = contactsResponse.data.reduce((sum, entry) => sum + entry.count, 0);
         setContacts({
           total: totalContacts,
@@ -60,11 +60,11 @@ function Dashboard() {
         });
 
         // Fetch scraping usage
-        const scrapingResponse = await axios.get("http://localhost:5000/api/dashboard/scraping-usage", { headers });
+        const scrapingResponse = await axios.get("http://82.180.137.7:5000/api/dashboard/scraping-usage", { headers });
         setScrapingUsage(scrapingResponse.data);
 
         // Fetch pipelines
-        const pipelinesResponse = await axios.get("http://localhost:5000/api/pipelines", { headers });
+        const pipelinesResponse = await axios.get("http://82.180.137.7:5000/api/pipelines", { headers });
         setPipelines({
           total: pipelinesResponse.data.length, // Count the total number of pipelines
           active: pipelinesResponse.data.filter((pipeline) => pipeline.status === "active").length,
@@ -72,15 +72,15 @@ function Dashboard() {
         });
 
         // Fetch payments
-        const paymentsResponse = await axios.get("http://localhost:5000/api/dashboard/payments", { headers });
+        const paymentsResponse = await axios.get("http://82.180.137.7:5000/api/dashboard/payments", { headers });
         setPayments(paymentsResponse.data); // Set payments data
 
         // Fetch meetings
-        const meetingsResponse = await axios.get("http://localhost:5000/api/meeting", { headers });
+        const meetingsResponse = await axios.get("http://82.180.137.7:5000/api/meeting", { headers });
         setMeetings(meetingsResponse.data);
 
         // Fetch tasks
-        const tasksResponse = await axios.get("http://localhost:5000/api/tasks", { headers }); // Fetch To-Do Tasks
+        const tasksResponse = await axios.get("http://82.180.137.7:5000/api/tasks", { headers }); // Fetch To-Do Tasks
         setTasks(tasksResponse.data);
 
         setLoading(false); // Set loading to false after data is fetched

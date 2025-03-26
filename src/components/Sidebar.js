@@ -13,7 +13,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token"); // Get the token from localStorage
-        const response = await axios.get("http://localhost:5000/api/users/profile", {
+        const response = await axios.get("http://82.180.137.7:5000/api/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`, // Add the token to the headers
           },

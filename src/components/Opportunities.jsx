@@ -25,7 +25,7 @@ function Opportunities() {
         const token = localStorage.getItem('token'); // Get the token from localStorage
         const headers = { Authorization: `Bearer ${token}` };
 
-        const response = await axios.get('http://localhost:5000/api/pipelines', { headers });
+        const response = await axios.get('http://82.180.137.7:5000/api/pipelines', { headers });
         setPipelines(response.data);
         if (response.data.length > 0) {
           setSelectedPipeline(response.data[0].name); // Set the first pipeline as selected by default
@@ -56,7 +56,7 @@ function Opportunities() {
         await Promise.all(
           pipeline.stages.map(async (stage) => {
             const response = await axios.get(
-              `http://localhost:5000/api/opportunities/${pipeline._id}/${stage._id}/opportunities`,
+              `http://82.180.137.7:5000/api/opportunities/${pipeline._id}/${stage._id}/opportunities`,
               { headers }
             );
             opportunitiesByStage[stage._id] = response.data;
@@ -126,7 +126,7 @@ function Opportunities() {
 
       // Make the POST request to create the opportunity
       const response = await axios.post(
-        `http://localhost:5000/api/opportunities/${pipelineId}/${stageId}/opportunities`, // Correct endpoint
+        `http://82.180.137.7:5000/api/opportunities/${pipelineId}/${stageId}/opportunities`, // Correct endpoint
         {
           title: newOpportunity.name, // Opportunity title
           description: newOpportunity.description || '', // Optional description

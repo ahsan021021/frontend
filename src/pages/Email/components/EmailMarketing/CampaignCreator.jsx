@@ -30,7 +30,7 @@ function CampaignCreator({ campaigns, setCampaigns }) {
 
   // Create axios instance with authorization token
   const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'http://82.180.137.7:5000/api',
     headers: {
       Authorization: `Bearer ${token}`
     }

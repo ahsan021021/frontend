@@ -22,7 +22,7 @@ function Settings() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/settings'); // Adjust the URL as needed
+        const response = await axios.get('http://82.180.137.7:5000/api/settings'); // Adjust the URL as needed
         setSettings(response.data);
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -43,7 +43,7 @@ function Settings() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put('http://localhost:5000/api/settings', settings); // Adjust the URL as needed
+      await axios.put('http://82.180.137.7:5000/api/settings', settings); // Adjust the URL as needed
       alert('Settings updated successfully!');
     } catch (error) {
       console.error('Error updating settings:', error);

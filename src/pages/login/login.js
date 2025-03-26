@@ -13,7 +13,7 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true); // Set loading to true when login starts
     try {
-      const response = await axios.post("http://localhost:5000/api/login", {
+      const response = await axios.post("http://82.180.137.7:5000/api/login", {
         email,
         password,
       });
@@ -32,7 +32,7 @@ const Login = () => {
       if (errorMessage === "Please verify your email first") {
         // Resend the verification email
         try {
-          const resendResponse = await axios.post("http://localhost:5000/api/resend-verification-email", {
+          const resendResponse = await axios.post("http://82.180.137.7:5000/api/resend-verification-email", {
             email,
           });
 

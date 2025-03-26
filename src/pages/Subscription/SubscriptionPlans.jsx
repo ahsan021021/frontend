@@ -26,7 +26,7 @@ const PaymentModal = ({ selectedPlan, onClose, onSuccess, onError, errorMessage 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/payment/methods', {
+        const response = await axios.get('http://82.180.137.7:5000/api/payment/methods', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -50,7 +50,7 @@ const PaymentModal = ({ selectedPlan, onClose, onSuccess, onError, errorMessage 
     try {
       if (selectedPlan === 'free') {
         const response = await axios.post(
-          'http://localhost:5000/api/payment/create-subscription',
+          'http://82.180.137.7:5000/api/payment/create-subscription',
           { planId: 'free' },
           {
             headers: {
@@ -67,7 +67,7 @@ const PaymentModal = ({ selectedPlan, onClose, onSuccess, onError, errorMessage 
       } else if (selectedPaymentMethod) {
         // Use saved payment method
         const response = await axios.post(
-          'http://localhost:5000/api/payment/create-subscription',
+          'http://82.180.137.7:5000/api/payment/create-subscription',
           { planId: selectedPlan, paymentMethodId: selectedPaymentMethod },
           {
             headers: {
@@ -96,7 +96,7 @@ const PaymentModal = ({ selectedPlan, onClose, onSuccess, onError, errorMessage 
         }
 
         const response = await axios.post(
-          'http://localhost:5000/api/payment/create-subscription',
+          'http://82.180.137.7:5000/api/payment/create-subscription',
           { planId: selectedPlan, paymentMethodId: paymentMethod.id },
           {
             headers: {
@@ -187,7 +187,7 @@ const SubscriptionPlans = () => {
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/user/subscription-plan', {
+        const response = await axios.get('http://82.180.137.7:5000/api/user/subscription-plan', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },

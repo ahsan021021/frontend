@@ -12,7 +12,7 @@ function Restore() {
         const token = localStorage.getItem('token'); // Get the token from localStorage
         const headers = { Authorization: `Bearer ${token}` }; // Add token to headers
 
-        const response = await axios.get('http://localhost:5000/api/contacts/deleted', { headers });
+        const response = await axios.get('http://82.180.137.7:5000/api/contacts/deleted', { headers });
         setDeletedContacts(response.data);
       } catch (error) {
         console.error('Error fetching deleted contacts:', error);
@@ -27,7 +27,7 @@ function Restore() {
       const token = localStorage.getItem('token'); // Get the token from localStorage
       const headers = { Authorization: `Bearer ${token}` }; // Add token to headers
 
-      await axios.patch(`http://localhost:5000/api/contacts/restore/${id}`, {}, { headers });
+      await axios.patch(`http://82.180.137.7:5000/api/contacts/restore/${id}`, {}, { headers });
       alert('Contact restored successfully!');
 
       // Remove the restored contact from the list
@@ -43,7 +43,7 @@ function Restore() {
       const token = localStorage.getItem('token'); // Get the token from localStorage
       const headers = { Authorization: `Bearer ${token}` }; // Add token to headers
 
-      await axios.delete(`http://localhost:5000/api/contacts/permanent/${id}`, { headers });
+      await axios.delete(`http://82.180.137.7:5000/api/contacts/permanent/${id}`, { headers });
       alert('Contact permanently deleted!');
 
       // Remove the permanently deleted contact from the list

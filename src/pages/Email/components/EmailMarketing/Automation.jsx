@@ -3,7 +3,7 @@ import axios from 'axios';
 import './EmailMarketing.css';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://82.180.137.7:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },

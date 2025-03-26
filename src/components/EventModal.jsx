@@ -79,7 +79,7 @@ export default function EventModal() {
     if (selectedEvent) {
       // Update an existing appointment
       axios
-        .put(`http://localhost:5000/api/appointments/${selectedEvent.eventId}`, appointment, {
+        .put(`http://82.180.137.7:5000/api/appointments/${selectedEvent.eventId}`, appointment, {
           withCredentials: true,
         })
         .then((response) => {
@@ -93,7 +93,7 @@ export default function EventModal() {
     } else {
       // Add a new appointment
       axios
-        .post("http://localhost:5000/api/appointments", appointment, { withCredentials: true })
+        .post("http://82.180.137.7:5000/api/appointments", appointment, { withCredentials: true })
         .then((response) => {
           dispatchCallEvent({ type: "push", payload: response.data });
         })
@@ -117,7 +117,7 @@ export default function EventModal() {
   function handleDelete() {
     if (selectedEvent) {
       axios
-        .delete(`http://localhost:5000/api/appointments/${selectedEvent.eventId}`, {
+        .delete(`http://82.180.137.7:5000/api/appointments/${selectedEvent.eventId}`, {
           withCredentials: true,
         })
         .then((response) => {

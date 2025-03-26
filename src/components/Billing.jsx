@@ -22,7 +22,7 @@ function Billing() {
     const fetchBillingDetails = async () => {
       try {
         const token = localStorage.getItem('token');
-        const updatedPaymentMethodsResponse = await axios.get('http://localhost:5000/api/payment/get-payment-methods', {
+        const updatedPaymentMethodsResponse = await axios.get('http://82.180.137.7:5000/api/payment/get-payment-methods', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -30,7 +30,7 @@ function Billing() {
         setPaymentMethods(updatedPaymentMethodsResponse.data.paymentMethods);
   
 
-        const subscriptionResponse = await axios.get('http://localhost:5000/api/user/subscription-plan', {
+        const subscriptionResponse = await axios.get('http://82.180.137.7:5000/api/user/subscription-plan', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -71,7 +71,7 @@ function Billing() {
 
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/payment/add-payment-method',
+        'http://82.180.137.7:5000/api/payment/add-payment-method',
         { paymentMethodId: paymentMethod.id },
         {
           headers: {
@@ -82,7 +82,7 @@ function Billing() {
 
       setMessage(response.data.message);
 
-      const updatedPaymentMethodsResponse = await axios.get('http://localhost:5000/api/payment/get-payment-methods', {
+      const updatedPaymentMethodsResponse = await axios.get('http://82.180.137.7:5000/api/payment/get-payment-methods', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -101,14 +101,14 @@ function Billing() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.delete(`http://localhost:5000/api/payment/delete-payment-method/${paymentMethodToDelete}`, {
+      const response = await axios.delete(`http://82.180.137.7:5000/api/payment/delete-payment-method/${paymentMethodToDelete}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setMessage(response.data.message);
 
-      const updatedPaymentMethodsResponse = await axios.get('http://localhost:5000/api/payment/get-payment-methods', {
+      const updatedPaymentMethodsResponse = await axios.get('http://82.180.137.7:5000/api/payment/get-payment-methods', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -127,7 +127,7 @@ function Billing() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/payment/set-default-payment-method',
+        'http://82.180.137.7:5000/api/payment/set-default-payment-method',
         { paymentMethodId },
         {
           headers: {
@@ -137,7 +137,7 @@ function Billing() {
       );
       setMessage(response.data.message);
 
-      const updatedPaymentMethodsResponse = await axios.get('http://localhost:5000/api/payment/get-payment-methods', {
+      const updatedPaymentMethodsResponse = await axios.get('http://82.180.137.7:5000/api/payment/get-payment-methods', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

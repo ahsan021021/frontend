@@ -12,7 +12,7 @@ import axios from 'axios'; // Import axios directly
 import { useNavigate } from 'react-router-dom';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api', // Use the specified URL
+  baseURL: 'http://82.180.137.7:5000/api', // Use the specified URL
   headers: {
     'Content-Type': 'application/json',
   },

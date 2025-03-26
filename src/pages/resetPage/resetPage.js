@@ -22,7 +22,7 @@ const ResetPassword = () => {
 
     setLoading(true); // Set loading to true when the request starts
     try {
-      const response = await axios.post("http://localhost:5000/api/reset-password", {
+      const response = await axios.post("http://82.180.137.7:5000/api/reset-password", {
         email,
         newPassword,
       });

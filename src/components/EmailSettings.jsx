@@ -14,7 +14,7 @@ function EmailSettings() {
   useEffect(() => {
     const fetchEmailSettings = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/email-settings', {
+        const response = await axios.get('http://82.180.137.7:5000/api/email-settings', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -51,7 +51,7 @@ function EmailSettings() {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/email-settings', emailSettingsData, {
+      const response = await axios.post('http://82.180.137.7:5000/api/email-settings', emailSettingsData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,

@@ -16,7 +16,7 @@ const SignUp = () => {
         e.preventDefault();
         setLoading(true); // Set loading to true when signup starts
         try {
-            const response = await axios.post("http://localhost:5000/api/signup", {
+            const response = await axios.post("http://82.180.137.7:5000/api/signup", {
                 email,
                 username,
                 password,

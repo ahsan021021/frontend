@@ -14,7 +14,7 @@ function MyProfile() {
   useEffect(() => {
     const fetchMyProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/users/profile', {
+        const response = await axios.get('http://82.180.137.7:5000/api/users/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         const profile = response.data;
@@ -47,7 +47,7 @@ function MyProfile() {
 
     try {
       const response = await axios.put(
-        'http://localhost:5000/api/users/change-password',
+        'http://82.180.137.7:5000/api/users/change-password',
         { currentPassword, newPassword, confirmPassword },
         {
           headers: {

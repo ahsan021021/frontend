@@ -16,7 +16,7 @@ const WelcomePage = () => {
     try {
       const token = localStorage.getItem('token'); // Get token from localStorage
       await axios.put(
-        'http://localhost:5000/api/users/profile',
+        'http://82.180.137.7:5000/api/users/profile',
         { firstName, lastName, purpose },
         {
           headers: {

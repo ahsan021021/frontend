@@ -12,7 +12,7 @@ function BusinessProfile() {
   useEffect(() => {
     const fetchBusinessProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/business-profile', {
+        const response = await axios.get('http://82.180.137.7:5000/api/business-profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } // Include the token in the request
         });
         const profile = response.data;
@@ -40,7 +40,7 @@ function BusinessProfile() {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/business-profile', profileData, {
+      const response = await axios.post('http://82.180.137.7:5000/api/business-profile', profileData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}` // Include the token in the request
