@@ -181,9 +181,6 @@ function EmailMarketing() {
         {activeTab === 'automation' && (
           <Automation />
         )}
-        {activeTab === 'segments' && (
-          <Segments subscribers={subscribers} />
-        )}
         {activeTab === 'templates' && (
           <Templates 
             templates={templates}
