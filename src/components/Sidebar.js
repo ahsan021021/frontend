@@ -93,7 +93,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           <NavLink to="/scraper" activeClassName="active">
             <FontAwesomeIcon icon={faEnvelope} className="menu-icon" /> Data Scrapper
           </NavLink>
-          <NavLink to="http://localhost:8080/" activeClassName="active">
+          <NavLink to="http://82.180.137.7:8080" activeClassName="active">
             <FontAwesomeIcon icon={faFileAlt} className="menu-icon" /> Landing Page Builder
           </NavLink>
         </div>
